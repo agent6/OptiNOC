@@ -2,6 +2,8 @@
 
 **OptiNOC** is an open-source, intelligent network discovery and monitoring platform built with Django. Designed as a modern alternative to traditional tools like Auvik, OptiNOC provides comprehensive network visibility, asset fingerprinting, real-time monitoring, and logical topology mapping.
 
+**Important:** Perform network discovery and scanning only on networks where you have explicit permission. Misuse could violate laws or organizational policies.
+
 ---
 
 **⚠️ Responsible Use:** Perform discovery and scanning only on networks where you have explicit permission. Misuse may violate laws or organizational policies.
@@ -70,12 +72,6 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
-To process background jobs, run the Celery worker (and optional scheduler) in separate terminals:
-
-```bash
-celery -A optinoc worker --loglevel=info
-celery -A optinoc beat --loglevel=info
-```
 
 For network scanning:
 
