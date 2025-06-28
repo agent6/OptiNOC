@@ -6,6 +6,8 @@
 
 ---
 
+**⚠️ Responsible Use:** Perform discovery and scanning only on networks where you have explicit permission. Misuse may violate laws or organizational policies.
+
 ## 🚀 Features
 
 - **Automated Network Discovery**  
@@ -70,12 +72,17 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
+
 For network scanning:
 
 * Ensure `snmpwalk`, Redis, and necessary ports are available.
 * Celery for async scans.
 
 ---
+
+## License
+
+This project is released under the MIT License. See [LICENSE](LICENSE) for details.
 
 
 
