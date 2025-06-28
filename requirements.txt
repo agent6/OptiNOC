@@ -1,0 +1,36 @@
+# Core framework
+Django>=4.2,<5.0
+
+# PostgreSQL support
+psycopg2-binary>=2.9
+
+# Environment variable management
+python-decouple>=3.8
+
+# Asynchronous task queue
+celery>=5.3
+redis>=5.0
+
+# Network discovery
+pysnmp>=4.4
+netmiko>=4.0
+textfsm>=1.1.3
+
+# Graphing and data
+matplotlib>=3.8
+pandas>=2.1
+networkx>=3.2
+pygraphviz>=1.11 ; platform_system != 'Windows'
+
+# API & serialization (optional, for REST endpoints)
+djangorestframework>=3.14
+
+# For job scheduling (optional alternative to Celery Beat)
+django-celery-beat>=2.5
+
+# For logging and monitoring
+colorlog>=6.8
+
+# Dev tools (optional)
+ipython>=8.20
+python-dotenv>=1.0
