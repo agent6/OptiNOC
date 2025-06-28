@@ -25,3 +25,36 @@ class AlertProfileLinkTest(TestCase):
         profile.tags.add(tag)
         self.assertIn(device, profile.devices.all())
         self.assertIn(tag, profile.tags.all())
+
+from unittest.mock import patch
+from . import snmp as snmp_module
+
+
+class SNMPScanTest(TestCase):
+    def test_scan_device_creates_interfaces(self):
+        def fake_walk(oid, ip, community, *args, **kwargs):
+            if oid == snmp_module.IF_NAME_OID:
+                return iter([
+                    (f"{oid}.1", "Gig0/1"),
+                    (f"{oid}.2", "Gig0/2"),
+                ])
+            if oid == snmp_module.IF_MAC_OID:
+                return iter([
+                    (f"{oid}.1", "aa:aa:aa:aa:aa:aa"),
+                    (f"{oid}.2", "bb:bb:bb:bb:bb:bb"),
+                ])
+            if oid == snmp_module.IF_STATUS_OID:
+                return iter([
+                    (f"{oid}.1", 1),
+                    (f"{oid}.2", 2),
+                ])
+            return iter([])
+
+        with patch.object(snmp_module, "snmp_get", side_effect=["sw1", "VendorOS"]), patch.object(
+            snmp_module, "snmp_walk", side_effect=fake_walk
+        ):
+            device = snmp_module.scan_device("192.0.2.1")
+
+        self.assertIsNotNone(device)
+        self.assertEqual(device.hostname, "sw1")
+        self.assertEqual(device.interfaces.count(), 2)
