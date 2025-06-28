@@ -80,3 +80,22 @@ class NeighborDiscoveryTest(TestCase):
         self.assertEqual(Connection.objects.count(), 1)
         conn = Connection.objects.first()
         self.assertEqual(conn.interface_b.device.hostname, "sw2")
+
+from unittest.mock import MagicMock
+from . import ssh as ssh_module
+
+
+class SSHScanTest(TestCase):
+    def test_ssh_scan_device_creates_interfaces(self):
+        fake_conn = MagicMock()
+        fake_conn.send_command.side_effect = [
+            "Hostname: sw1\nVersion 15.1",
+            "Gig0/0 10.0.0.1 up up\nGig0/1 unassigned up down",
+        ]
+        with patch("inventory.ssh.ConnectHandler", return_value=fake_conn):
+            device = ssh_module.ssh_scan_device("192.0.2.1", "admin", "pass")
+
+        self.assertEqual(device.hostname, "sw1")
+        self.assertEqual(device.interfaces.count(), 2)
+        names = sorted(i.name for i in device.interfaces.all())
+        self.assertEqual(names, ["Gig0/0", "Gig0/1"])
