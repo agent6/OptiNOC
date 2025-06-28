@@ -1,13 +1,22 @@
-from pysnmp.hlapi import (
-    SnmpEngine,
-    CommunityData,
-    UdpTransportTarget,
-    ContextData,
-    ObjectType,
-    ObjectIdentity,
-    getCmd,
-    nextCmd,
-)
+try:
+    from pysnmp.hlapi import (
+        SnmpEngine,
+        CommunityData,
+        UdpTransportTarget,
+        ContextData,
+        ObjectType,
+        ObjectIdentity,
+        getCmd,
+        nextCmd,
+    )
+except Exception:  # pragma: no cover - fallback for missing pysnmp on Py3.12
+    SnmpEngine = CommunityData = UdpTransportTarget = ContextData = None
+
+    def getCmd(*args, **kwargs):  # type: ignore
+        raise ImportError("pysnmp is not available")
+
+    def nextCmd(*args, **kwargs):  # type: ignore
+        raise ImportError("pysnmp is not available")
 from django.utils import timezone
 from .models import Device, Interface, Connection, Host
 
@@ -190,7 +199,8 @@ def gather_cam_arp(ip, community=DEFAULT_COMMUNITY):
             continue
         ifindex = parts[-5]
         ip_addr = ".".join(parts[-4:])
-        mac = ":".join(f"{b:02x}" for b in val.asOctets())
+        octets = val.asOctets() if hasattr(val, "asOctets") else val
+        mac = ":".join(f"{b:02x}" for b in octets)
         iface = idx_to_iface.get(ifindex)
         host, _ = Host.objects.get_or_create(mac_address=mac)
         host.ip_address = ip_addr
