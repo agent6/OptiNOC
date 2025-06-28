@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth.models import User
-from .models import Device, Interface, Connection, Tag, AlertProfile, Host
+from .models import Device, Interface, Connection, Tag, AlertProfile, Host, MetricRecord
 
 
 class DeviceModelTest(TestCase):
@@ -172,3 +172,18 @@ class TopologyDataTest(TestCase):
         data = resp.json()
         self.assertEqual(len(data['nodes']), 2)
         self.assertEqual(len(data['edges']), 1)
+
+
+class MetricAPITest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user('tester', 't@example.com', 'pw')
+
+    def test_device_metric_endpoint(self):
+        device = Device.objects.create(hostname='r1')
+        MetricRecord.objects.create(device=device, metric='cpu', value=50)
+
+        self.client.force_login(self.user)
+        resp = self.client.get(reverse('device_metric_data', args=[device.pk, 'cpu']))
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertEqual(len(data), 1)

@@ -18,6 +18,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'inventory',
     'accounts',
+    'rest_framework',
     'django_celery_beat',
 ]
 
