@@ -52,5 +52,3 @@
 30. **Future-proofing:** (Optional) Outline tasks for future enhancements (e.g. multi-organization, external auth, cloud integration) in documentation, to clarify scope.
 
 By following this task list, the AI agent can iteratively build a Django application that discovers network devices (via SNMP/SSH/etc.), inventories them, visualizes the network, and sets up monitoring and alerts. Each step uses known Python tools and protocols (e.g. **pysnmp** for SNMP, **Netmiko** for SSH, **Celery** for scheduling, and **Chart.js** for graphs) as cited above.
-
-**Sources:** Industry examples and documentation of relevant tools (pysnmp, Netmiko, Celery, Chart.js, LLDP) were referenced to ensure the recommended approach.
