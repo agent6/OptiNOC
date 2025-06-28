@@ -1,0 +1,42 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Assets</h2>
+<form class="row g-2 mb-3" method="get">
+  <div class="col-auto">
+    <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Search" class="form-control" />
+  </div>
+  <div class="col-auto">
+    <select name="tag" class="form-select">
+      <option value="">All Tags</option>
+      {% for t in tags %}
+        <option value="{{ t.name }}" {% if t.name == request.GET.tag %}selected{% endif %}>{{ t.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-auto">
+    <button type="submit" class="btn btn-primary">Filter</button>
+  </div>
+</form>
+<table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>IP</th>
+      <th>Vendor</th>
+      <th>Model</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for d in devices %}
+    <tr>
+      <td><a href="{% url 'device_detail' d.pk %}">{{ d.hostname }}</a></td>
+      <td>{{ d.management_ip }}</td>
+      <td>{{ d.vendor }}</td>
+      <td>{{ d.model }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="4">No devices found.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

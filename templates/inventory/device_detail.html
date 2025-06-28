@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>{{ device.hostname }}</h2>
+<p><strong>IP:</strong> {{ device.management_ip }}</p>
+<p><strong>Vendor:</strong> {{ device.vendor }} {{ device.model }}</p>
+<p><strong>OS:</strong> {{ device.os_version }}</p>
+<p><strong>Last Seen:</strong> {{ device.last_seen }}</p>
+<h3>Interfaces</h3>
+<table class="table table-sm">
+  <thead><tr><th>Name</th><th>MAC</th><th>IP</th><th>Status</th></tr></thead>
+  <tbody>
+    {% for iface in device.interfaces.all %}
+    <tr>
+      <td>{{ iface.name }}</td>
+      <td>{{ iface.mac_address }}</td>
+      <td>{{ iface.ip_address }}</td>
+      <td>{{ iface.status }}</td>
+    </tr>
+    {% empty %}
+    <tr><td colspan="4">No interfaces.</td></tr>
+    {% endfor %}
+  </tbody>
+</table>
+<h3>Connections</h3>
+<ul>
+  {% for conn in connections %}
+    <li>{{ conn.interface_a }} &lt;-&gt; {{ conn.interface_b }}</li>
+  {% empty %}
+    <li>No connections recorded.</li>
+  {% endfor %}
+</ul>
+{% endblock %}
