@@ -22,8 +22,8 @@
 - **Roadblock Identification**  
   Highlights missing credentials, incorrect SNMP community strings, blocked ports, and other issues that prevent full visibility.
 
-- **Monitoring & Baselines**  
-  Tracks device performance (CPU, memory, interface stats), uptime, and latency over time with graphs and alerting.
+- **Monitoring & Baselines**
+  Tracks device performance (CPU, memory, interface stats), uptime, and latency over time with graphs and alerting. Includes periodic ICMP ping checks for availability monitoring.
 
 - **Tags, Alerts & Profiles**  
   Organize assets with tags and configure threshold-based alert profiles to fit your environment.

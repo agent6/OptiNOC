@@ -2,7 +2,8 @@ from celery import shared_task
 from .discovery import discover_network, periodic_scan
 from django.utils import timezone
 from .snmp import scan_device, discover_neighbors, gather_cam_arp, poll_metrics
-from .models import Device, MetricRecord
+from .ping import check_ping
+from .models import Device, MetricRecord, Alert
 
 
 @shared_task
@@ -83,6 +84,30 @@ def metric_poll_task(default_community="public"):
 
         results.append(device.management_ip)
 
+    return results
+
+
+@shared_task
+def ping_check_task():
+    """Ping all devices and record availability."""
+    timestamp = timezone.now()
+    results = []
+    for device in Device.objects.all():
+        if not device.management_ip:
+            continue
+        is_up = check_ping(device.management_ip)
+        MetricRecord.objects.create(
+            device=device,
+            metric="ping",
+            value=1 if is_up else 0,
+            timestamp=timestamp,
+        )
+        device.is_online = is_up
+        device.last_ping = timestamp
+        device.save(update_fields=["is_online", "last_ping"])
+        if not is_up:
+            Alert.objects.create(device=device, metric="ping", value=0)
+        results.append(device.management_ip)
     return results
 
 
