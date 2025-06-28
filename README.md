@@ -26,6 +26,8 @@
   Tracks device performance (CPU, memory, interface stats), uptime, and latency over time with graphs and alerting. Includes periodic ICMP ping checks for availability monitoring.
 - **Historical Metrics Storage**
   Metric data points are stored in the `MetricRecord` table with indexed timestamps so charts can efficiently query a date range.
+- **Interactive Graphs**
+  Device and interface detail pages display historical CPU and bandwidth graphs rendered with Chart.js and HTMX powered AJAX requests.
 
 - **Tags, Alerts & Profiles**  
   Organize assets with tags and configure threshold-based alert profiles to fit your environment.

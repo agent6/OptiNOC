@@ -190,6 +190,37 @@ class MetricAPITest(TestCase):
         self.assertEqual(len(data), 1)
 
 
+class InterfaceMetricAPITest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user('tester', 't@example.com', 'pw')
+
+    def test_interface_metric_endpoint(self):
+        device = Device.objects.create(hostname='r1')
+        iface = Interface.objects.create(device=device, name='eth0')
+        MetricRecord.objects.create(device=device, interface=iface, metric='in_octets', value=100)
+        MetricRecord.objects.create(device=device, interface=iface, metric='out_octets', value=200)
+
+        self.client.force_login(self.user)
+        resp = self.client.get(reverse('interface_metric_data', args=[iface.pk]))
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertEqual(len(data['in']), 1)
+        self.assertEqual(len(data['out']), 1)
+
+
+class InterfaceDetailViewTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user('tester', 't@example.com', 'pw')
+
+    def test_interface_detail_view(self):
+        device = Device.objects.create(hostname='r1')
+        iface = Interface.objects.create(device=device, name='eth0')
+        self.client.force_login(self.user)
+        resp = self.client.get(reverse('interface_detail', args=[iface.pk]))
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, 'eth0')
+
+
 class AlertListViewTest(TestCase):
     def setUp(self):
         self.user = User.objects.create_user('tester', 't@example.com', 'pw')
