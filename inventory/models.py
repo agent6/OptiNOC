@@ -14,6 +14,13 @@ class Device(models.Model):
     snmp_community = models.CharField(max_length=255, blank=True)
     ssh_username = models.CharField(max_length=255, blank=True)
     ssh_password = models.CharField(max_length=255, blank=True)
+    # discovery metadata
+    last_seen = models.DateTimeField(blank=True, null=True)
+    last_scanned = models.DateTimeField(blank=True, null=True)
+    discovered_snmp_community = models.CharField(max_length=255, blank=True)
+    discovered_ssh_username = models.CharField(max_length=255, blank=True)
+    discovered_ssh_password = models.CharField(max_length=255, blank=True)
+    roadblocks = models.TextField(blank=True)
 
     def __str__(self):
         return self.hostname or str(self.pk)
@@ -27,6 +34,7 @@ class Interface(models.Model):
     mac_address = models.CharField(max_length=32, blank=True)
     ip_address = models.GenericIPAddressField(protocol="both", unpack_ipv4=True, blank=True, null=True)
     status = models.CharField(max_length=50, blank=True)
+    last_scanned = models.DateTimeField(blank=True, null=True)
 
     def __str__(self):
         return f"{self.device.hostname}:{self.name}" if self.device_id else self.name
