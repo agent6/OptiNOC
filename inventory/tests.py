@@ -1,5 +1,5 @@
 from django.test import TestCase
-from .models import Device, Interface, Connection, Tag, AlertProfile
+from .models import Device, Interface, Connection, Tag, AlertProfile, Host
 
 
 class DeviceModelTest(TestCase):
@@ -99,3 +99,27 @@ class SSHScanTest(TestCase):
         self.assertEqual(device.interfaces.count(), 2)
         names = sorted(i.name for i in device.interfaces.all())
         self.assertEqual(names, ["Gig0/0", "Gig0/1"])
+
+
+class CamArpTest(TestCase):
+    def test_gather_cam_arp_creates_host(self):
+        device = Device.objects.create(hostname="sw1", management_ip="192.0.2.1")
+        Interface.objects.create(device=device, name="Gig0/1")
+
+        def fake_walk(oid, ip, community, *args, **kwargs):
+            if oid == snmp_module.IF_NAME_OID:
+                return iter([(f"{oid}.1", "Gig0/1")])
+            if oid == snmp_module.DOT1D_BASE_PORT_IFINDEX_OID:
+                return iter([(f"{oid}.1", 1)])
+            if oid == snmp_module.DOT1D_TP_FDB_PORT_OID:
+                return iter([(f"{oid}.0.17.34.51.68.85", 1)])
+            if oid == snmp_module.IP_NET_TO_MEDIA_PHYSADDR_OID:
+                return iter([(f"{oid}.1.192.0.2.100", b"\x00\x11\x22\x33\x44\x55")])
+            return iter([])
+
+        with patch.object(snmp_module, "snmp_walk", side_effect=fake_walk):
+            snmp_module.gather_cam_arp("192.0.2.1")
+
+        host = Host.objects.get(mac_address="00:11:22:33:44:55")
+        self.assertEqual(host.ip_address, "192.0.2.100")
+        self.assertEqual(host.interface.name, "Gig0/1")

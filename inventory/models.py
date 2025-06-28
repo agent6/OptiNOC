@@ -77,3 +77,14 @@ class AlertProfile(models.Model):
 
     def __str__(self):
         return self.name
+
+
+class Host(models.Model):
+    """Host discovered via ARP/CAM tables."""
+    mac_address = models.CharField(max_length=32, unique=True)
+    ip_address = models.GenericIPAddressField(protocol="both", blank=True, null=True)
+    interface = models.ForeignKey(Interface, related_name="hosts", null=True, blank=True, on_delete=models.SET_NULL)
+    last_seen = models.DateTimeField(blank=True, null=True)
+
+    def __str__(self):
+        return self.mac_address

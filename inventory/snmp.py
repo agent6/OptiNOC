@@ -9,7 +9,7 @@ from pysnmp.hlapi import (
     nextCmd,
 )
 from django.utils import timezone
-from .models import Device, Interface, Connection
+from .models import Device, Interface, Connection, Host
 
 
 DEFAULT_COMMUNITY = "public"
@@ -52,6 +52,13 @@ SYS_DESCR_OID = "1.3.6.1.2.1.1.1.0"
 IF_NAME_OID = "1.3.6.1.2.1.2.2.1.2"
 IF_MAC_OID = "1.3.6.1.2.1.2.2.1.6"
 IF_STATUS_OID = "1.3.6.1.2.1.2.2.1.8"
+
+# CAM and ARP table OIDs
+DOT1D_TP_FDB_PORT_OID = "1.3.6.1.2.1.17.4.3.1.2"
+DOT1D_BASE_PORT_IFINDEX_OID = "1.3.6.1.2.1.17.1.4.1.2"
+IP_NET_TO_MEDIA_PHYSADDR_OID = "1.3.6.1.2.1.4.22.1.2"
+IP_NET_TO_MEDIA_IFINDEX_OID = "1.3.6.1.2.1.4.22.1.1"
+IP_NET_TO_MEDIA_NETADDR_OID = "1.3.6.1.2.1.4.22.1.3"
 
 
 def scan_device(ip, community=DEFAULT_COMMUNITY):
@@ -138,4 +145,58 @@ def discover_neighbors(ip, community=DEFAULT_COMMUNITY):
         remote_device, _ = Device.objects.get_or_create(hostname=data.get("hostname", ""))
         remote_iface, _ = Interface.objects.get_or_create(device=remote_device, name=data.get("port", ""))
         Connection.objects.get_or_create(interface_a=local_iface, interface_b=remote_iface)
+
+
+def gather_cam_arp(ip, community=DEFAULT_COMMUNITY):
+    """Collect CAM and ARP tables and link hosts to interfaces."""
+    device = Device.objects.filter(management_ip=ip).first()
+    if not device:
+        return
+
+    # Map interface indexes to Interface objects
+    idx_to_iface = {}
+    for oid, val in snmp_walk(IF_NAME_OID, ip, community):
+        idx = oid.split(".")[-1]
+        iface = Interface.objects.filter(device=device, name=str(val)).first()
+        if iface:
+            idx_to_iface[idx] = iface
+
+    # Bridge port -> ifIndex mapping
+    bridge_to_if = {oid.split(".")[-1]: str(val) for oid, val in snmp_walk(DOT1D_BASE_PORT_IFINDEX_OID, ip, community)}
+
+    # CAM table entries: map MAC -> ifIndex
+    cam_entries = {}
+    for oid, val in snmp_walk(DOT1D_TP_FDB_PORT_OID, ip, community):
+        mac_parts = oid.split(".")[-6:]
+        mac = ":".join(f"{int(p):02x}" for p in mac_parts)
+        bridge_port = str(val)
+        ifindex = bridge_to_if.get(bridge_port)
+        if ifindex:
+            cam_entries[mac] = ifindex
+
+    for mac, ifidx in cam_entries.items():
+        iface = idx_to_iface.get(ifidx)
+        if not iface:
+            continue
+        host, _ = Host.objects.get_or_create(mac_address=mac)
+        host.interface = iface
+        host.last_seen = timezone.now()
+        host.save()
+
+    # ARP table entries
+    for oid, val in snmp_walk(IP_NET_TO_MEDIA_PHYSADDR_OID, ip, community):
+        parts = oid.split(".")
+        if len(parts) < 5:
+            continue
+        ifindex = parts[-5]
+        ip_addr = ".".join(parts[-4:])
+        mac = ":".join(f"{b:02x}" for b in val.asOctets())
+        iface = idx_to_iface.get(ifindex)
+        host, _ = Host.objects.get_or_create(mac_address=mac)
+        host.ip_address = ip_addr
+        if iface:
+            host.interface = iface
+        host.last_seen = timezone.now()
+        host.save()
+
 
