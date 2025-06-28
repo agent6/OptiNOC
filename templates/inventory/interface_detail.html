@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+<h2>{{ interface.device.hostname }} {{ interface.name }}</h2>
+<p><strong>MAC:</strong> {{ interface.mac_address }}</p>
+<p><strong>IP:</strong> {{ interface.ip_address }}</p>
+<p><strong>Status:</strong> {{ interface.status }}</p>
+
+<h3>Bandwidth (octets)</h3>
+<canvas id="bw-chart" height="200"></canvas>
+<div id="bw-data"
+     hx-get="{% url 'interface_metric_data' interface.pk %}"
+     hx-trigger="load"
+     hx-swap="none"></div>
+<script src="{% static 'chart.min.js' %}"></script>
+<script src="{% static 'htmx.min.js' %}"></script>
+<script>
+  document.addEventListener('htmx:afterRequest', function(evt) {
+    if (evt.detail.elt.id === 'bw-data') {
+      const data = JSON.parse(evt.detail.xhr.responseText);
+      const labels = data.in.map(p => p.timestamp);
+      const inVals = data.in.map(p => p.value);
+      const outVals = data.out.map(p => p.value);
+      new Chart(document.getElementById('bw-chart').getContext('2d'), {
+        type: 'line',
+        data: {
+          labels: labels,
+          datasets: [
+            { label: 'In', data: inVals, borderColor: 'rgb(54, 162, 235)', tension: 0.1 },
+            { label: 'Out', data: outVals, borderColor: 'rgb(255, 99, 132)', tension: 0.1 }
+          ]
+        }
+      });
+    }
+  });
+</script>
+{% endblock %}

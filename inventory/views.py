@@ -54,6 +54,15 @@ def device_detail(request, pk):
 
 
 @login_required
+def interface_detail(request, pk):
+    """Display metrics and details for a single interface."""
+    iface = Interface.objects.select_related('device').prefetch_related('hosts').get(pk=pk)
+    return render(request, 'inventory/interface_detail.html', {
+        'interface': iface,
+    })
+
+
+@login_required
 def network_topology(request):
     """Render the topology visualization page."""
     return render(request, 'inventory/network_topology.html')
@@ -98,6 +107,32 @@ def device_metric_data(request, pk, metric):
     records = records.order_by('timestamp')
     serializer = MetricRecordSerializer(records, many=True)
     return Response(serializer.data)
+
+
+@api_view(["GET"])
+def interface_metric_data(request, pk):
+    """Return in/out octet metrics for an interface."""
+    iface = Interface.objects.get(pk=pk)
+    records = iface.metric_records.filter(metric__in=["in_octets", "out_octets"])
+
+    start = request.GET.get("start")
+    end = request.GET.get("end")
+    if start:
+        dt = parse_datetime(start)
+        if dt:
+            records = records.filter(timestamp__gte=dt)
+    if end:
+        dt = parse_datetime(end)
+        if dt:
+            records = records.filter(timestamp__lte=dt)
+
+    in_records = records.filter(metric="in_octets").order_by("timestamp")
+    out_records = records.filter(metric="out_octets").order_by("timestamp")
+    data = {
+        "in": MetricRecordSerializer(in_records, many=True).data,
+        "out": MetricRecordSerializer(out_records, many=True).data,
+    }
+    return Response(data)
 
 
 @login_required
