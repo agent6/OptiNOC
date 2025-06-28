@@ -88,3 +88,34 @@ class Host(models.Model):
 
     def __str__(self):
         return self.mac_address
+
+
+class MetricRecord(models.Model):
+    """Time-series performance metric for a device or interface."""
+
+    device = models.ForeignKey(
+        Device,
+        related_name="metric_records",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+    interface = models.ForeignKey(
+        Interface,
+        related_name="metric_records",
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+    metric = models.CharField(max_length=100)
+    value = models.FloatField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        indexes = [
+            models.Index(fields=["device", "interface", "metric", "timestamp"])
+        ]
+
+    def __str__(self):
+        target = self.interface or self.device
+        return f"{target} {self.metric}={self.value}" if target else self.metric

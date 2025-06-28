@@ -1,6 +1,9 @@
 from django.shortcuts import render, redirect
 from django.db.models import Prefetch
 from django.http import JsonResponse
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from .serializers import MetricRecordSerializer
 from .models import Device, Interface, Connection, Tag
 from .forms import DeviceTagForm
 from django.contrib.auth.decorators import login_required
@@ -72,3 +75,15 @@ def topology_data(request):
         )
     ]
     return JsonResponse({'nodes': nodes, 'edges': edges})
+
+
+@api_view(['GET'])
+def device_metric_data(request, pk, metric):
+    """Return time-series metric data for a device."""
+    records = (
+        Device.objects.get(pk=pk)
+        .metric_records.filter(metric=metric)
+        .order_by('timestamp')
+    )
+    serializer = MetricRecordSerializer(records, many=True)
+    return Response(serializer.data)

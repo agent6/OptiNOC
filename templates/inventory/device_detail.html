@@ -35,4 +35,27 @@
     <li>No connections recorded.</li>
   {% endfor %}
 </ul>
+<h3>CPU Usage</h3>
+<canvas id="cpu-chart" height="200"></canvas>
+<script src="{% static 'chart.min.js' %}"></script>
+<script>
+fetch("{% url 'device_metric_data' device.pk 'cpu' %}")
+  .then(resp => resp.json())
+  .then(data => {
+    const labels = data.map(p => p.timestamp);
+    const values = data.map(p => p.value);
+    new Chart(document.getElementById('cpu-chart').getContext('2d'), {
+      type: 'line',
+      data: {
+        labels: labels,
+        datasets: [{
+          label: 'CPU %',
+          data: values,
+          borderColor: 'rgb(75,192,192)',
+          tension: 0.1,
+        }]
+      },
+    });
+  });
+</script>
 {% endblock %}

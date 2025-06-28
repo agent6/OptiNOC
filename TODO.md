@@ -32,7 +32,7 @@
 16. [x] **Asset listing and detail pages:** Build Bootstrap-styled pages to display the inventory. The **Asset List** page should tabulate devices (name, IP, vendor, type), with search/filter by tag or type. The **Asset Detail** page should show device attributes, interface list, neighbor connections, and current status. Use Bootstrap components (tables, cards) for layout.
 17. [x] **Tagging UI:** On the Asset Detail (or list), allow the admin to add/remove tags to assets. Implement a UI (e.g. multiselect dropdown or checkboxes) backed by the Tag model. Support filtering by tag on the Asset List page.
 18. [x] **Network topology diagram:** Implemented a view that returns JSON nodes/edges and a topology page using **vis.js** to render the network interactively with pan/zoom.
-19. [ ] **Charts and graphs:** For performance metrics (see below), use **Chart.js** or a similar library to plot time-series. For example, a bandwidth-over-time graph on the Interface page. GeeksforGeeks notes that “chartjs is an easy way to include animated, interactive graphs” in Django apps. Implement API endpoints (using Django REST Framework) that return JSON data points for charts, and embed Chart.js in templates to render them.
+19. [x] **Charts and graphs:** Added Chart.js to static files and integrated a CPU usage line chart on the device detail page. Created a `MetricRecord` model with a REST API endpoint to return metric data and fetch it via AJAX.
 20. [ ] **Alerts UI:** Provide a page to view active alerts (devices that exceeded thresholds). Show alert history and link back to asset detail. Optionally, allow editing AlertProfile settings in the admin interface.
 
 ## Monitoring, Metrics, and Alerts
