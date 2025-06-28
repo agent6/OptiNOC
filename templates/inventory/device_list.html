@@ -24,6 +24,7 @@
       <th>IP</th>
       <th>Vendor</th>
       <th>Model</th>
+      <th>Tags</th>
     </tr>
   </thead>
   <tbody>
@@ -33,6 +34,13 @@
       <td>{{ d.management_ip }}</td>
       <td>{{ d.vendor }}</td>
       <td>{{ d.model }}</td>
+      <td>
+        {% for tag in d.tags.all %}
+          <span class="badge bg-secondary">{{ tag.name }}</span>
+        {% empty %}
+          &mdash;
+        {% endfor %}
+      </td>
     </tr>
     {% empty %}
     <tr><td colspan="4">No devices found.</td></tr>
