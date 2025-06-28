@@ -1,6 +1,7 @@
 from pathlib import Path
 import os
 from decouple import config
+from celery.schedules import crontab
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -17,6 +18,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'inventory',
     'accounts',
+    'django_celery_beat',
 ]
 
 MIDDLEWARE = [
@@ -101,3 +103,19 @@ LOGIN_URL = 'login'
 # Celery Configuration
 CELERY_BROKER_URL = config('CELERY_BROKER_URL', default='redis://localhost:6379/0')
 CELERY_RESULT_BACKEND = config('CELERY_RESULT_BACKEND', default=CELERY_BROKER_URL)
+CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
+
+CELERY_BEAT_SCHEDULE = {
+    'periodic-scan': {
+        'task': 'inventory.tasks.periodic_scan_task',
+        'schedule': crontab(minute=0, hour='*/1'),
+    },
+    'metric-poll': {
+        'task': 'inventory.tasks.metric_poll_task',
+        'schedule': crontab(minute='*/5'),
+    },
+    'alert-check': {
+        'task': 'inventory.tasks.alert_check_task',
+        'schedule': crontab(minute='*/1'),
+    },
+}
