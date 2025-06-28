@@ -21,6 +21,7 @@ class Device(models.Model):
     discovered_ssh_username = models.CharField(max_length=255, blank=True)
     discovered_ssh_password = models.CharField(max_length=255, blank=True)
     roadblocks = models.TextField(blank=True)
+    tags = models.ManyToManyField('Tag', blank=True, related_name='devices')
 
     def __str__(self):
         return self.hostname or str(self.pk)
@@ -71,6 +72,8 @@ class AlertProfile(models.Model):
     cpu_threshold = models.PositiveSmallIntegerField(blank=True, null=True)
     interface_down = models.BooleanField(default=False)
     description = models.TextField(blank=True)
+    devices = models.ManyToManyField('Device', blank=True, related_name='alert_profiles')
+    tags = models.ManyToManyField('Tag', blank=True, related_name='alert_profiles')
 
     def __str__(self):
         return self.name

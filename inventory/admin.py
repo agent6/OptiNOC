@@ -5,6 +5,7 @@ from .models import Device, Interface, Connection, Tag, AlertProfile
 @admin.register(Device)
 class DeviceAdmin(admin.ModelAdmin):
     list_display = ('hostname', 'management_ip', 'vendor', 'model')
+    filter_horizontal = ('tags',)
 
 
 @admin.register(Interface)
@@ -25,3 +26,4 @@ class TagAdmin(admin.ModelAdmin):
 @admin.register(AlertProfile)
 class AlertProfileAdmin(admin.ModelAdmin):
     list_display = ('name', 'cpu_threshold', 'interface_down')
+    filter_horizontal = ('devices', 'tags')
