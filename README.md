@@ -90,6 +90,7 @@ For network scanning:
 
 * Ensure `snmpwalk`, Redis, and necessary ports are available.
 * Celery for async scans.
+* You can also run `python manage.py scan_network --seed <IP>` for a manual discovery scan or without `--seed` to rescan existing devices.
 
 ---
 
