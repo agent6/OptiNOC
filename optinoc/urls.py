@@ -8,6 +8,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('accounts.urls')),
     path('', views.index, name='index'),
+    path('', include('inventory.urls')),
 ]
 
 if settings.DEBUG:
