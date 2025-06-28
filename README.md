@@ -61,6 +61,7 @@ pip install -r requirements.txt
 # Set up environment variables (or use .env file)
 export DJANGO_SECRET_KEY='your-secret-key'
 export DB_NAME='optinoc_db'
+export CELERY_BROKER_URL='redis://localhost:6379/0'
 
 # Optional static and media locations
 export STATIC_ROOT="$PWD/static_root"
@@ -74,6 +75,9 @@ python manage.py createsuperuser
 
 # Start the server
 python manage.py runserver
+
+# Start Celery worker
+celery -A optinoc worker -l info
 ```
 
 ### Static & Media Files
