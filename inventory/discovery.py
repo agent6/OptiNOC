@@ -1,5 +1,5 @@
 from .snmp import scan_device, discover_neighbors, gather_cam_arp
-from .models import Host
+from .models import Host, Device
 
 DEFAULT_COMMUNITY = "public"
 
@@ -33,3 +33,17 @@ def discover_network(seed_ip, community=DEFAULT_COMMUNITY):
                 queue.append(host_ip)
 
     return list(visited)
+
+
+def periodic_scan(community=DEFAULT_COMMUNITY):
+    """Rescan all known devices to refresh inventory."""
+    scanned = []
+    for device in Device.objects.all():
+        if not device.management_ip:
+            continue
+        scan_device(device.management_ip, community)
+        discover_neighbors(device.management_ip, community)
+        gather_cam_arp(device.management_ip, community)
+        scanned.append(device.management_ip)
+    return scanned
+

@@ -1,5 +1,5 @@
 from celery import shared_task
-from .discovery import discover_network
+from .discovery import discover_network, periodic_scan
 from .snmp import scan_device, discover_neighbors, gather_cam_arp
 
 
@@ -24,3 +24,9 @@ def scan_device_task(ip, community="public"):
 def discover_network_task(seed_ip, community="public"):
     """Celery task wrapper for discover_network."""
     return discover_network(seed_ip, community)
+
+
+@shared_task
+def periodic_scan_task(community="public"):
+    """Rescan all known devices."""
+    return periodic_scan(community)
