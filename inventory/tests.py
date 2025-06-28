@@ -123,3 +123,31 @@ class CamArpTest(TestCase):
         host = Host.objects.get(mac_address="00:11:22:33:44:55")
         self.assertEqual(host.ip_address, "192.0.2.100")
         self.assertEqual(host.interface.name, "Gig0/1")
+
+
+from . import discovery as discovery_module
+
+
+class DiscoveryLogicTest(TestCase):
+    def test_discover_network_recurses(self):
+        created = {}
+
+        def fake_scan(ip, community="public"):
+            device = Device.objects.create(hostname=f"dev-{ip}", management_ip=ip)
+            Interface.objects.create(device=device, name="eth0")
+            created[ip] = device
+            return device
+
+        def fake_gather_cam_arp(ip, community="public"):
+            if ip == "192.0.2.1":
+                iface = created[ip].interfaces.first()
+                Host.objects.create(mac_address="aa", ip_address="192.0.2.2", interface=iface)
+
+        with patch.object(discovery_module, "scan_device", side_effect=fake_scan), patch.object(
+            discovery_module,
+            "discover_neighbors",
+            return_value=None,
+        ), patch.object(discovery_module, "gather_cam_arp", side_effect=fake_gather_cam_arp):
+            visited = discovery_module.discover_network("192.0.2.1")
+
+        self.assertEqual(set(visited), {"192.0.2.1", "192.0.2.2"})
