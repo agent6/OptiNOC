@@ -1,4 +1,6 @@
 from django.test import TestCase
+from django.urls import reverse
+from django.contrib.auth.models import User
 from .models import Device, Interface, Connection, Tag, AlertProfile, Host
 
 
@@ -151,3 +153,22 @@ class DiscoveryLogicTest(TestCase):
             visited = discovery_module.discover_network("192.0.2.1")
 
         self.assertEqual(set(visited), {"192.0.2.1", "192.0.2.2"})
+
+
+class TopologyDataTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user('tester', 't@example.com', 'pw')
+
+    def test_topology_data_returns_graph(self):
+        d1 = Device.objects.create(hostname='a')
+        d2 = Device.objects.create(hostname='b')
+        i1 = Interface.objects.create(device=d1, name='eth0')
+        i2 = Interface.objects.create(device=d2, name='eth0')
+        Connection.objects.create(interface_a=i1, interface_b=i2)
+
+        self.client.force_login(self.user)
+        resp = self.client.get(reverse('topology_data'))
+        self.assertEqual(resp.status_code, 200)
+        data = resp.json()
+        self.assertEqual(len(data['nodes']), 2)
+        self.assertEqual(len(data['edges']), 1)
