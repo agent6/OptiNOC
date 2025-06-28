@@ -5,6 +5,12 @@
 <p><strong>Vendor:</strong> {{ device.vendor }} {{ device.model }}</p>
 <p><strong>OS:</strong> {{ device.os_version }}</p>
 <p><strong>Last Seen:</strong> {{ device.last_seen }}</p>
+<h3>Tags</h3>
+<form method="post" class="mb-3">
+  {% csrf_token %}
+  {{ form.tags }}
+  <button type="submit" class="btn btn-primary mt-2">Update Tags</button>
+</form>
 <h3>Interfaces</h3>
 <table class="table table-sm">
   <thead><tr><th>Name</th><th>MAC</th><th>IP</th><th>Status</th></tr></thead>
