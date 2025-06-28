@@ -78,6 +78,8 @@ python manage.py runserver
 
 # Start Celery worker
 celery -A optinoc worker -l info
+# Start Celery beat scheduler
+celery -A optinoc beat -l info
 ```
 
 ### Static & Media Files

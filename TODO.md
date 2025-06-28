@@ -24,7 +24,7 @@
 ## Scheduling and Background Tasks
 
 13. [x] **Integrate Celery for async tasks:** Install and configure Celery in the Django project (with a broker like Redis or RabbitMQ). This will allow the heavy network scans to run asynchronously. Use the `@shared_task` decorator or `tasks.py` files for scan functions.
-14. [ ] **Set up periodic tasks (Celery Beat):** Use Celery Beat to schedule regular rescans of the network. For example, schedule daily or hourly SNMP discovery jobs. The Celery docs explain that “celery beat is a scheduler; it kicks off tasks at regular intervals”. Define entries in the `CELERY_BEAT_SCHEDULE` (or use django-celery-beat) to run tasks like `network_scan`, `metric_poll`, and `alert_check`.
+14. [x] **Set up periodic tasks (Celery Beat):** Use Celery Beat to schedule regular rescans of the network. For example, schedule daily or hourly SNMP discovery jobs. The Celery docs explain that “celery beat is a scheduler; it kicks off tasks at regular intervals”. Define entries in the `CELERY_BEAT_SCHEDULE` (or use django-celery-beat) to run tasks like `network_scan`, `metric_poll`, and `alert_check`.
 15. [ ] **Django management commands:** Optionally create custom Django admin commands (e.g. `python manage.py scan_network`) to trigger scans manually. These commands can call the same logic as the Celery tasks, useful for testing or one-off runs.
 
 ## User Interface and Views

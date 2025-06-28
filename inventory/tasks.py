@@ -30,3 +30,17 @@ def discover_network_task(seed_ip, community="public"):
 def periodic_scan_task(community="public"):
     """Rescan all known devices."""
     return periodic_scan(community)
+
+
+@shared_task
+def metric_poll_task():
+    """Placeholder for periodic metric polling."""
+    # Logic for polling device metrics will be implemented later
+    return "metrics polled"
+
+
+@shared_task
+def alert_check_task():
+    """Placeholder for alert evaluation."""
+    # Logic for evaluating alert thresholds will be implemented later
+    return "alerts checked"
