@@ -21,6 +21,9 @@ class Device(models.Model):
     discovered_ssh_username = models.CharField(max_length=255, blank=True)
     discovered_ssh_password = models.CharField(max_length=255, blank=True)
     roadblocks = models.TextField(blank=True)
+    # availability
+    is_online = models.BooleanField(default=False)
+    last_ping = models.DateTimeField(blank=True, null=True)
     tags = models.ManyToManyField('Tag', blank=True, related_name='devices')
 
     def __str__(self):
