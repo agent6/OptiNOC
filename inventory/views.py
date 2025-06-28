@@ -3,6 +3,7 @@ from django.db.models import Prefetch
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from django.utils.dateparse import parse_datetime
 from .serializers import MetricRecordSerializer
 from .models import Device, Interface, Connection, Tag, Alert
 from .forms import DeviceTagForm
@@ -80,11 +81,21 @@ def topology_data(request):
 @api_view(['GET'])
 def device_metric_data(request, pk, metric):
     """Return time-series metric data for a device."""
-    records = (
-        Device.objects.get(pk=pk)
-        .metric_records.filter(metric=metric)
-        .order_by('timestamp')
-    )
+    device = Device.objects.get(pk=pk)
+    records = device.metric_records.filter(metric=metric)
+
+    start = request.GET.get('start')
+    end = request.GET.get('end')
+    if start:
+        dt = parse_datetime(start)
+        if dt:
+            records = records.filter(timestamp__gte=dt)
+    if end:
+        dt = parse_datetime(end)
+        if dt:
+            records = records.filter(timestamp__lte=dt)
+
+    records = records.order_by('timestamp')
     serializer = MetricRecordSerializer(records, many=True)
     return Response(serializer.data)
 
