@@ -9,7 +9,7 @@ from pysnmp.hlapi import (
     nextCmd,
 )
 from django.utils import timezone
-from .models import Device, Interface
+from .models import Device, Interface, Connection
 
 
 DEFAULT_COMMUNITY = "public"
@@ -90,3 +90,52 @@ def scan_device(ip, community=DEFAULT_COMMUNITY):
     device.last_scanned = timezone.now()
     device.save()
     return device
+
+
+# LLDP and CDP tables
+LLDP_SYSNAME_OID = "1.0.8802.1.1.2.1.4.1.1.9"
+LLDP_PORTID_OID = "1.0.8802.1.1.2.1.4.1.1.7"
+CDP_DEVICEID_OID = "1.3.6.1.4.1.9.9.23.1.2.1.1.6"
+CDP_DEVICEPORT_OID = "1.3.6.1.4.1.9.9.23.1.2.1.1.7"
+
+
+def discover_neighbors(ip, community=DEFAULT_COMMUNITY):
+    """Discover neighbors via LLDP/CDP and create Connection records."""
+    device = Device.objects.filter(management_ip=ip).first()
+    if not device:
+        return
+
+    # Map interface indexes to Interface objects
+    idx_to_iface = {}
+    for oid, val in snmp_walk(IF_NAME_OID, ip, community):
+        idx = oid.split(".")[-1]
+        iface = Interface.objects.filter(device=device, name=str(val)).first()
+        if iface:
+            idx_to_iface[idx] = iface
+
+    neighbors = {}
+
+    # LLDP neighbors
+    for oid, val in snmp_walk(LLDP_SYSNAME_OID, ip, community):
+        local_idx = oid.split(".")[-2]
+        neighbors.setdefault(local_idx, {})["hostname"] = str(val)
+    for oid, val in snmp_walk(LLDP_PORTID_OID, ip, community):
+        local_idx = oid.split(".")[-2]
+        neighbors.setdefault(local_idx, {})["port"] = str(val)
+
+    # CDP neighbors
+    for oid, val in snmp_walk(CDP_DEVICEID_OID, ip, community):
+        local_idx = oid.split(".")[-2]
+        neighbors.setdefault(local_idx, {})["hostname"] = str(val)
+    for oid, val in snmp_walk(CDP_DEVICEPORT_OID, ip, community):
+        local_idx = oid.split(".")[-2]
+        neighbors.setdefault(local_idx, {})["port"] = str(val)
+
+    for idx, data in neighbors.items():
+        local_iface = idx_to_iface.get(idx)
+        if not local_iface:
+            continue
+        remote_device, _ = Device.objects.get_or_create(hostname=data.get("hostname", ""))
+        remote_iface, _ = Interface.objects.get_or_create(device=remote_device, name=data.get("port", ""))
+        Connection.objects.get_or_create(interface_a=local_iface, interface_b=remote_iface)
+

@@ -1,5 +1,5 @@
 from django.test import TestCase
-from .models import Device, Tag, AlertProfile
+from .models import Device, Interface, Connection, Tag, AlertProfile
 
 
 class DeviceModelTest(TestCase):
@@ -58,3 +58,25 @@ class SNMPScanTest(TestCase):
         self.assertIsNotNone(device)
         self.assertEqual(device.hostname, "sw1")
         self.assertEqual(device.interfaces.count(), 2)
+
+
+class NeighborDiscoveryTest(TestCase):
+    def test_discover_neighbors_creates_connections(self):
+        device = Device.objects.create(hostname="sw1", management_ip="192.0.2.1")
+        Interface.objects.create(device=device, name="Gig0/1")
+
+        def fake_walk(oid, ip, community, *args, **kwargs):
+            if oid == snmp_module.IF_NAME_OID:
+                return iter([(f"{oid}.1", "Gig0/1")])
+            if oid == snmp_module.LLDP_SYSNAME_OID:
+                return iter([(f"{oid}.1.1", "sw2")])
+            if oid == snmp_module.LLDP_PORTID_OID:
+                return iter([(f"{oid}.1.1", "Eth0/1")])
+            return iter([])
+
+        with patch.object(snmp_module, "snmp_walk", side_effect=fake_walk):
+            snmp_module.discover_neighbors("192.0.2.1")
+
+        self.assertEqual(Connection.objects.count(), 1)
+        conn = Connection.objects.first()
+        self.assertEqual(conn.interface_b.device.hostname, "sw2")
