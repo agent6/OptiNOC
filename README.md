@@ -2,7 +2,11 @@
 
 **OptiNOC** is an open-source, intelligent network discovery and monitoring platform built with Django. Designed as a modern alternative to traditional tools like Auvik, OptiNOC provides comprehensive network visibility, asset fingerprinting, real-time monitoring, and logical topology mapping.
 
+**Important:** Perform network discovery and scanning only on networks where you have explicit permission. Misuse could violate laws or organizational policies.
+
 ---
+
+**⚠️ Responsible Use:** Perform discovery and scanning only on networks where you have explicit permission. Misuse may violate laws or organizational policies.
 
 ## 🚀 Features
 
@@ -66,7 +70,8 @@ python manage.py createsuperuser
 
 # Start the server
 python manage.py runserver
-````
+```
+
 
 For network scanning:
 
@@ -76,6 +81,6 @@ For network scanning:
 ---
 
 ## License
+This project is released under the MIT License. See [LICENSE](LICENSE) for details.
 
-This project is licensed under the [MIT License](https://opensource.org/licenses/MIT). See the [LICENSE](LICENSE) file for details.
 
