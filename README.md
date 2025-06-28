@@ -4,6 +4,8 @@
 
 ---
 
+**⚠️ Responsible Use:** Perform discovery and scanning only on networks where you have explicit permission. Misuse may violate laws or organizational policies.
+
 ## 🚀 Features
 
 - **Automated Network Discovery**  
@@ -66,7 +68,14 @@ python manage.py createsuperuser
 
 # Start the server
 python manage.py runserver
-````
+```
+
+To process background jobs, run the Celery worker (and optional scheduler) in separate terminals:
+
+```bash
+celery -A optinoc worker --loglevel=info
+celery -A optinoc beat --loglevel=info
+```
 
 For network scanning:
 
@@ -74,6 +83,10 @@ For network scanning:
 * Celery for async scans.
 
 ---
+
+## License
+
+This project is released under the MIT License. See [LICENSE](LICENSE) for details.
 
 
 
