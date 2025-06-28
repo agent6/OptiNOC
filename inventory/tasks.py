@@ -1,6 +1,8 @@
 from celery import shared_task
 from .discovery import discover_network, periodic_scan
-from .snmp import scan_device, discover_neighbors, gather_cam_arp
+from django.utils import timezone
+from .snmp import scan_device, discover_neighbors, gather_cam_arp, poll_metrics
+from .models import Device, MetricRecord
 
 
 @shared_task
@@ -33,10 +35,55 @@ def periodic_scan_task(community="public"):
 
 
 @shared_task
-def metric_poll_task():
-    """Placeholder for periodic metric polling."""
-    # Logic for polling device metrics will be implemented later
-    return "metrics polled"
+def metric_poll_task(default_community="public"):
+    """Poll devices for performance metrics and store results."""
+    results = []
+    timestamp = timezone.now()
+    for device in Device.objects.all():
+        if not device.management_ip:
+            continue
+        community = device.snmp_community or device.discovered_snmp_community or default_community
+        metrics = poll_metrics(device.management_ip, community)
+
+        if "cpu" in metrics:
+            MetricRecord.objects.create(
+                device=device,
+                metric="cpu",
+                value=metrics["cpu"],
+                timestamp=timestamp,
+            )
+        if "memory" in metrics:
+            MetricRecord.objects.create(
+                device=device,
+                metric="memory",
+                value=metrics["memory"],
+                timestamp=timestamp,
+            )
+
+        for iface_name, vals in metrics.get("interfaces", {}).items():
+            iface = device.interfaces.filter(name=iface_name).first()
+            if not iface:
+                continue
+            if vals.get("in_octets") is not None:
+                MetricRecord.objects.create(
+                    device=device,
+                    interface=iface,
+                    metric="in_octets",
+                    value=vals["in_octets"],
+                    timestamp=timestamp,
+                )
+            if vals.get("out_octets") is not None:
+                MetricRecord.objects.create(
+                    device=device,
+                    interface=iface,
+                    metric="out_octets",
+                    value=vals["out_octets"],
+                    timestamp=timestamp,
+                )
+
+        results.append(device.management_ip)
+
+    return results
 
 
 @shared_task

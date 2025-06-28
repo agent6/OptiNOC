@@ -30,6 +30,7 @@ class AlertProfileLinkTest(TestCase):
 
 from unittest.mock import patch
 from . import snmp as snmp_module
+from . import tasks
 
 
 class SNMPScanTest(TestCase):
@@ -200,3 +201,24 @@ class AlertListViewTest(TestCase):
         resp = self.client.get(reverse('alert_list'))
         self.assertEqual(resp.status_code, 200)
         self.assertContains(resp, 'r1')
+
+
+class MetricPollingTaskTest(TestCase):
+    @patch('inventory.tasks.poll_metrics')
+    def test_metric_poll_task_creates_metric_records(self, mock_poll):
+        device = Device.objects.create(hostname='r1', management_ip='192.0.2.1')
+        Interface.objects.create(device=device, name='eth0')
+        mock_poll.return_value = {
+            'cpu': 50,
+            'memory': 70,
+            'interfaces': {'eth0': {'in_octets': 1000, 'out_octets': 2000}},
+        }
+
+        tasks.metric_poll_task()
+
+        self.assertEqual(MetricRecord.objects.filter(device=device, metric='cpu').count(), 1)
+        self.assertEqual(MetricRecord.objects.filter(device=device, metric='memory').count(), 1)
+        self.assertEqual(
+            MetricRecord.objects.filter(interface__name='eth0', metric='in_octets').count(),
+            1,
+        )
