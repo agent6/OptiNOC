@@ -37,7 +37,7 @@
 
 ## Monitoring, Metrics, and Alerts
 
-21. [ ] **Performance polling:** After discovery, set up ongoing monitoring. Use SNMP to poll key metrics on each device (e.g. CPU and memory utilization, interface in/out octets via `IF-MIB::ifInOctets`/`ifOutOctets`). Schedule these polling tasks via Celery periodically (e.g. every few minutes). Store the results in a time-series table (e.g. Model with timestamp, device, metric, value).
+21. [x] **Performance polling:** After discovery, set up ongoing monitoring. Use SNMP to poll key metrics on each device (e.g. CPU and memory utilization, interface in/out octets via `IF-MIB::ifInOctets`/`ifOutOctets`). Schedule these polling tasks via Celery periodically (e.g. every few minutes). Store the results in a time-series table (e.g. Model with timestamp, device, metric, value).
 22. [ ] **Ping/availability checks:** Implement periodic ICMP ping (via Python’s `subprocess` or a library) to each asset’s management IP to check up/down status. Record unreachable events for alerts.
 23. [ ] **Data storage for history:** Choose where to keep historical metrics. For simplicity, a Django model (e.g. `MetricRecord`) can record timestamped values. For a large scale, consider integrating a time-series database or Redis, but out-of-scope for initial MVP. Ensure queries for charting are efficient (index by device and time).
 24. [ ] **Graphing historical data:** On each Device/Interface detail page, display graphs of stored metrics (e.g. last 24h CPU, bandwidth). Use AJAX (HTMX) to fetch data points from the Django API (via REST or Django view) and render with Chart.js (as per GeeksforGeeks example).

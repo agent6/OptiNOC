@@ -210,3 +210,41 @@ def gather_cam_arp(ip, community=DEFAULT_COMMUNITY):
         host.save()
 
 
+# Performance metric OIDs
+CPU_LOAD_OID = "1.3.6.1.2.1.25.3.3.1.2"
+MEM_TOTAL_OID = "1.3.6.1.4.1.2021.4.5.0"
+MEM_AVAIL_OID = "1.3.6.1.4.1.2021.4.6.0"
+IF_IN_OCTETS_OID = "1.3.6.1.2.1.2.2.1.10"
+IF_OUT_OCTETS_OID = "1.3.6.1.2.1.2.2.1.16"
+
+
+def poll_metrics(ip, community=DEFAULT_COMMUNITY):
+    """Return basic performance metrics for a device."""
+
+    metrics = {}
+
+    cpu_loads = [int(v) for _, v in snmp_walk(CPU_LOAD_OID, ip, community)]
+    if cpu_loads:
+        metrics["cpu"] = sum(cpu_loads) / len(cpu_loads)
+
+    mem_total = snmp_get(MEM_TOTAL_OID, ip, community)
+    mem_avail = snmp_get(MEM_AVAIL_OID, ip, community)
+    if mem_total is not None and mem_avail is not None and int(mem_total) > 0:
+        used = int(mem_total) - int(mem_avail)
+        metrics["memory"] = used / int(mem_total) * 100
+
+    names = {oid.split(".")[-1]: str(val) for oid, val in snmp_walk(IF_NAME_OID, ip, community)}
+    in_octets = {oid.split(".")[-1]: int(val) for oid, val in snmp_walk(IF_IN_OCTETS_OID, ip, community)}
+    out_octets = {oid.split(".")[-1]: int(val) for oid, val in snmp_walk(IF_OUT_OCTETS_OID, ip, community)}
+
+    interfaces = {}
+    for idx, name in names.items():
+        interfaces[name] = {
+            "in_octets": in_octets.get(idx),
+            "out_octets": out_octets.get(idx),
+        }
+    metrics["interfaces"] = interfaces
+
+    return metrics
+
+
