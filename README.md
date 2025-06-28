@@ -66,7 +66,7 @@ python manage.py createsuperuser
 
 # Start the server
 python manage.py runserver
-````
+```
 
 For network scanning:
 
