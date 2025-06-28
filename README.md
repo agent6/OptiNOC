@@ -62,6 +62,10 @@ pip install -r requirements.txt
 export DJANGO_SECRET_KEY='your-secret-key'
 export DB_NAME='optinoc_db'
 
+# Optional static and media locations
+export STATIC_ROOT="$PWD/static_root"
+export MEDIA_ROOT="$PWD/media"
+
 # Run migrations
 python manage.py migrate
 
@@ -72,6 +76,9 @@ python manage.py createsuperuser
 python manage.py runserver
 ```
 
+### Static & Media Files
+
+Run `python manage.py collectstatic` to copy Bootstrap and other assets into `STATIC_ROOT`. User uploads will be stored in `MEDIA_ROOT`.
 
 For network scanning:
 
