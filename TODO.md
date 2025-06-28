@@ -3,7 +3,7 @@
 ## Project Setup and Configuration
 
 1. [x] **Initialize the Django project.** Create a new Django project and app. Configure **SQLite** for local development and prepare settings for **PostgreSQL** in production (e.g. using environment variables or a separate settings file). Install necessary packages (e.g. `django`, `psycopg2`, `django-environ` or similar). Ensure **Bootstrap CSS** is included (via static files or CDN) for front-end styling.
-2. [ ] **Set up local authentication.** Use Django’s built-in auth system: implement user registration/login pages (or just admin-created users), password management, and secure login/logout functionality. Restrict to a single-organization context (no multi-tenant logic needed). Skip external OAuth/OIDC for now.
+2. [x] **Set up local authentication.** Use Django’s built-in auth system: implement user registration/login pages (or just admin-created users), password management, and secure login/logout functionality. Restrict to a single-organization context (no multi-tenant logic needed). Skip external OAuth/OIDC for now.
 3. [ ] **Configure static and media files.** Ensure `STATIC_URL` and `MEDIA_URL` are set, and collect static assets (including Bootstrap) so the app can run on-premises without internet access if needed. Document environment variables and settings for dev vs prod.
 
 ## Data Models
