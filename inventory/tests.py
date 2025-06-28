@@ -1,7 +1,7 @@
 from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth.models import User
-from .models import Device, Interface, Connection, Tag, AlertProfile, Host, MetricRecord
+from .models import Device, Interface, Connection, Tag, AlertProfile, Host, MetricRecord, Alert
 
 
 class DeviceModelTest(TestCase):
@@ -187,3 +187,16 @@ class MetricAPITest(TestCase):
         self.assertEqual(resp.status_code, 200)
         data = resp.json()
         self.assertEqual(len(data), 1)
+
+
+class AlertListViewTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user('tester', 't@example.com', 'pw')
+
+    def test_alert_list_view(self):
+        device = Device.objects.create(hostname='r1')
+        Alert.objects.create(device=device, metric='cpu', value=95, threshold=90)
+        self.client.force_login(self.user)
+        resp = self.client.get(reverse('alert_list'))
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, 'r1')

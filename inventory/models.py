@@ -119,3 +119,22 @@ class MetricRecord(models.Model):
     def __str__(self):
         target = self.interface or self.device
         return f"{target} {self.metric}={self.value}" if target else self.metric
+
+
+class Alert(models.Model):
+    """Alert triggered when a metric threshold is crossed."""
+
+    device = models.ForeignKey(
+        Device, related_name="alerts", on_delete=models.CASCADE
+    )
+    metric = models.CharField(max_length=100)
+    value = models.FloatField()
+    threshold = models.FloatField(blank=True, null=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
+    cleared_at = models.DateTimeField(blank=True, null=True)
+
+    class Meta:
+        indexes = [models.Index(fields=["device", "timestamp"])]
+
+    def __str__(self):
+        return f"{self.device} {self.metric}={self.value}"

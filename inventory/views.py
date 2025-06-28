@@ -4,7 +4,7 @@ from django.http import JsonResponse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from .serializers import MetricRecordSerializer
-from .models import Device, Interface, Connection, Tag
+from .models import Device, Interface, Connection, Tag, Alert
 from .forms import DeviceTagForm
 from django.contrib.auth.decorators import login_required
 
@@ -87,3 +87,19 @@ def device_metric_data(request, pk, metric):
     )
     serializer = MetricRecordSerializer(records, many=True)
     return Response(serializer.data)
+
+
+@login_required
+def alert_list(request):
+    """Display active alerts and recent history."""
+    active = Alert.objects.filter(cleared_at__isnull=True).select_related("device")
+    history = (
+        Alert.objects.filter(cleared_at__isnull=False)
+        .select_related("device")
+        .order_by("-timestamp")[:50]
+    )
+    return render(
+        request,
+        "inventory/alerts.html",
+        {"active_alerts": active, "history": history},
+    )
