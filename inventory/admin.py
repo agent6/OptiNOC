@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Device, Interface, Connection, Tag, AlertProfile
+from .models import Device, Interface, Connection, Tag, AlertProfile, Alert
 
 
 @admin.register(Device)
@@ -27,3 +27,9 @@ class TagAdmin(admin.ModelAdmin):
 class AlertProfileAdmin(admin.ModelAdmin):
     list_display = ('name', 'cpu_threshold', 'interface_down')
     filter_horizontal = ('devices', 'tags')
+
+
+@admin.register(Alert)
+class AlertAdmin(admin.ModelAdmin):
+    list_display = ('device', 'metric', 'value', 'threshold', 'timestamp', 'cleared_at')
+    list_filter = ('metric', 'cleared_at')

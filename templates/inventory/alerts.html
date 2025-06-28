@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block content %}
+<h2>Alerts</h2>
+<h3>Active Alerts</h3>
+<table class="table table-striped">
+  <thead><tr><th>Device</th><th>Metric</th><th>Value</th><th>Threshold</th><th>Since</th></tr></thead>
+  <tbody>
+  {% for a in active_alerts %}
+  <tr>
+    <td><a href="{% url 'device_detail' a.device.pk %}">{{ a.device.hostname }}</a></td>
+    <td>{{ a.metric }}</td>
+    <td>{{ a.value }}</td>
+    <td>{{ a.threshold }}</td>
+    <td>{{ a.timestamp }}</td>
+  </tr>
+  {% empty %}
+  <tr><td colspan="5">No active alerts.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+<h3>Recent History</h3>
+<table class="table table-sm">
+  <thead><tr><th>Device</th><th>Metric</th><th>Value</th><th>Threshold</th><th>Raised</th><th>Cleared</th></tr></thead>
+  <tbody>
+  {% for a in history %}
+  <tr>
+    <td><a href="{% url 'device_detail' a.device.pk %}">{{ a.device.hostname }}</a></td>
+    <td>{{ a.metric }}</td>
+    <td>{{ a.value }}</td>
+    <td>{{ a.threshold }}</td>
+    <td>{{ a.timestamp }}</td>
+    <td>{{ a.cleared_at }}</td>
+  </tr>
+  {% empty %}
+  <tr><td colspan="6">No historical alerts.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
