@@ -253,3 +253,21 @@ class MetricPollingTaskTest(TestCase):
             MetricRecord.objects.filter(interface__name='eth0', metric='in_octets').count(),
             1,
         )
+
+
+class AlertEvaluationTest(TestCase):
+    @patch('inventory.tasks.poll_metrics')
+    def test_cpu_alert_created_and_cleared(self, mock_poll):
+        device = Device.objects.create(hostname='r1', management_ip='192.0.2.1')
+        profile = AlertProfile.objects.create(name='default', cpu_threshold=80)
+        profile.devices.add(device)
+
+        mock_poll.return_value = {'cpu': 90, 'interfaces': {}}
+        tasks.metric_poll_task()
+        alert = Alert.objects.filter(device=device, metric='cpu', cleared_at__isnull=True).first()
+        self.assertIsNotNone(alert)
+
+        mock_poll.return_value = {'cpu': 50, 'interfaces': {}}
+        tasks.metric_poll_task()
+        alert.refresh_from_db()
+        self.assertIsNotNone(alert.cleared_at)
