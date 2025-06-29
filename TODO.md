@@ -60,3 +60,4 @@
 36. [x] Switched Bootstrap, Chart.js and HTMX to CDN versions and removed local copies.
 37. [x] Added device credentials form and view so admins can store SNMP and SSH details and clear roadblocks.
 38. [x] Added local server discovery which registers the host and parses the ARP table for connected nodes.
+39. [x] Startup scan added via `wsgi.py` and Celery beat now runs discovery every 5 minutes. Assets page includes a "Run Discovery" button.

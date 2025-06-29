@@ -8,6 +8,7 @@ from .serializers import MetricRecordSerializer
 from .models import Device, Interface, Connection, Tag, Alert
 from .forms import DeviceTagForm, DeviceCredentialsForm
 from django.contrib.auth.decorators import login_required
+from .tasks import periodic_scan_task
 
 
 @login_required
@@ -27,6 +28,14 @@ def device_list(request):
         'devices': devices,
         'tags': tags,
     })
+
+
+@login_required
+def trigger_discovery(request):
+    """Kick off an inventory scan via Celery and redirect back."""
+    if request.method == "POST":
+        periodic_scan_task.delay()
+    return redirect('device_list')
 
 
 @login_required
