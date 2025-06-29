@@ -12,6 +12,9 @@
   {{ form.tags }}
   <button type="submit" class="btn btn-primary mt-2">Update Tags</button>
 </form>
+<p>
+  <a href="{% url 'device_credentials' device.pk %}" class="btn btn-secondary btn-sm">Edit Credentials</a>
+</p>
 <h3>Interfaces</h3>
 <table class="table table-sm">
   <thead><tr><th>Name</th><th>MAC</th><th>IP</th><th>Status</th></tr></thead>

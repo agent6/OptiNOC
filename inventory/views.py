@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from django.utils.dateparse import parse_datetime
 from .serializers import MetricRecordSerializer
 from .models import Device, Interface, Connection, Tag, Alert
-from .forms import DeviceTagForm
+from .forms import DeviceTagForm, DeviceCredentialsForm
 from django.contrib.auth.decorators import login_required
 
 
@@ -49,6 +49,23 @@ def device_detail(request, pk):
     return render(request, 'inventory/device_detail.html', {
         'device': device,
         'connections': connections,
+        'form': form,
+    })
+
+
+@login_required
+def device_credentials(request, pk):
+    """Allow entering SNMP/SSH credentials and roadblocks."""
+    device = Device.objects.get(pk=pk)
+    if request.method == "POST":
+        form = DeviceCredentialsForm(request.POST, instance=device)
+        if form.is_valid():
+            form.save()
+            return redirect('device_detail', pk=pk)
+    else:
+        form = DeviceCredentialsForm(instance=device)
+    return render(request, 'inventory/device_credentials.html', {
+        'device': device,
         'form': form,
     })
 
