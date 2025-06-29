@@ -35,3 +35,6 @@ colorlog>=6.8
 # Dev tools (optional)
 ipython>=8.20
 python-dotenv>=1.0
+
+# WSGI server for production
+gunicorn>=21.2
