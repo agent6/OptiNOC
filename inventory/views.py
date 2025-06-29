@@ -5,7 +5,7 @@ from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from django.utils.dateparse import parse_datetime
 from .serializers import MetricRecordSerializer
-from .models import Device, Interface, Connection, Tag, Alert
+from .models import Device, Interface, Connection, Tag, Alert, Host
 from .forms import DeviceTagForm, DeviceCredentialsForm
 from django.contrib.auth.decorators import login_required
 from .tasks import periodic_scan_task
@@ -42,6 +42,8 @@ def trigger_discovery(request):
 def device_detail(request, pk):
     device = Device.objects.prefetch_related('interfaces__hosts', 'tags').get(pk=pk)
 
+    hosts = Host.objects.filter(interface__device=device).select_related('interface')
+
     if request.method == "POST":
         form = DeviceTagForm(request.POST, instance=device)
         if form.is_valid():
@@ -58,6 +60,7 @@ def device_detail(request, pk):
     return render(request, 'inventory/device_detail.html', {
         'device': device,
         'connections': connections,
+        'hosts': hosts,
         'form': form,
     })
 
