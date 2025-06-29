@@ -15,8 +15,10 @@ The project is mirrored on GitHub at [agent6/OptiNOC](https://github.com/agent6/
 - **Automated Network Discovery**  
   Uses SNMP, SSH, Telnet, CDP, LLDP, ARP/CAM tables, HTTP(S), and more to identify assets and map connections.
 
-- **Asset Fingerprinting & Inventory**  
+- **Asset Fingerprinting & Inventory**
   Classifies devices with vendor, model, OS, interface data, and environmental metadata.
+- **Local Server Auto-Inventory**
+  The Ubuntu host running OptiNOC is automatically added as an asset and its ARP table parsed for connected nodes.
 
 - **Logical Network Mapping**  
   Visualizes device relationships and topologies based on link-layer discovery and MAC/IP mapping.

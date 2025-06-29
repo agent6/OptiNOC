@@ -157,11 +157,10 @@ class DiscoveryLogicTest(TestCase):
                 iface = created[ip].interfaces.first()
                 Host.objects.create(mac_address="aa", ip_address="192.0.2.2", interface=iface)
 
-        with patch.object(discovery_module, "scan_device", side_effect=fake_scan), patch.object(
-            discovery_module,
-            "discover_neighbors",
-            return_value=None,
-        ), patch.object(discovery_module, "gather_cam_arp", side_effect=fake_gather_cam_arp):
+        with patch.object(discovery_module, "scan_device", side_effect=fake_scan), \
+             patch.object(discovery_module, "discover_neighbors", return_value=None), \
+             patch.object(discovery_module, "gather_cam_arp", side_effect=fake_gather_cam_arp), \
+             patch.object(discovery_module, "discover_local_server", return_value=None):
             visited = discovery_module.discover_network("192.0.2.1")
 
         self.assertEqual(set(visited), {"192.0.2.1", "192.0.2.2"})
