@@ -47,4 +47,4 @@
 ## Testing, Documentation, and Deployment
 
 27. [ ] **Document setup and usage:** Create README/docs explaining how to set up the app, configure database and Celery, and run scans. Include instructions on adding SNMP/SSH credentials and interpreting the output (e.g., what the “roadblocks” list means).
-28. [ ] **Prepare for on-premises deployment:** Ensure all dependencies are installable from internal repos if needed. Configure Django’s `ALLOWED_HOSTS` and security settings for production. Provide a script to install on a local server.
+28. [ ] **Prepare for on-premises deployment:** Ensure all dependencies are installable from internal repos if needed. Configure Django’s `ALLOWED_HOSTS` and security settings for production. Provide a script to install on a local Ubuntu server, so that all packages (both Ubuntu and PIP) are installed.
