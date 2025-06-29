@@ -59,3 +59,4 @@
 35. [x] Fixed missing `{% load static %}` in device_detail template to resolve TemplateSyntaxError.
 36. [x] Switched Bootstrap, Chart.js and HTMX to CDN versions and removed local copies.
 37. [x] Added device credentials form and view so admins can store SNMP and SSH details and clear roadblocks.
+38. [x] Added local server discovery which registers the host and parses the ARP table for connected nodes.
