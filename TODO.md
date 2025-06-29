@@ -61,3 +61,4 @@
 37. [x] Added device credentials form and view so admins can store SNMP and SSH details and clear roadblocks.
 38. [x] Added local server discovery which registers the host and parses the ARP table for connected nodes.
 39. [x] Startup scan added via `wsgi.py` and Celery beat now runs discovery every 5 minutes. Assets page includes a "Run Discovery" button.
+40. [x] ARP hosts from the local server now seed recursive discovery, but only private IPs are scanned.
