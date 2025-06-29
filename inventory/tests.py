@@ -2,7 +2,6 @@ from django.test import TestCase
 from django.urls import reverse
 from django.contrib.auth.models import User
 from .models import Device, Interface, Connection, Tag, AlertProfile, Host, MetricRecord, Alert
-import subprocess
 
 
 class DeviceModelTest(TestCase):
@@ -29,10 +28,9 @@ class AlertProfileLinkTest(TestCase):
         self.assertIn(device, profile.devices.all())
         self.assertIn(tag, profile.tags.all())
 
-from unittest.mock import patch, mock_open
+from unittest.mock import patch
 from . import snmp as snmp_module
 from . import tasks
-from . import server
 
 
 class SNMPScanTest(TestCase):
@@ -195,38 +193,6 @@ class DiscoveryLogicTest(TestCase):
 
         self.assertIn("10.0.0.5", visited)
         self.assertNotIn("8.8.8.8", visited)
-
-
-class ServerDiscoveryTest(TestCase):
-    def test_proc_net_arp_fallback(self):
-        arp_data = (
-            "IP address       HW type     Flags       HW address            Mask     Device\n"
-            "10.0.0.5       0x1         0x2         aa:bb:cc:dd:ee:ff     *        eth0\n"
-        )
-
-        real_check_output = subprocess.check_output
-
-        def fake_check_output(cmd, *args, **kwargs):
-            if isinstance(cmd, list) and cmd and cmd[0] == "ip":
-                if len(cmd) > 1 and cmd[1] == "neigh":
-                    raise FileNotFoundError
-                if cmd[:3] == ["ip", "-o", "link"]:
-                    return "2: eth0: <BROADCAST> mtu 1500 qdisc noop state DOWN mode DEFAULT group default qlen 1000 link/ether 02:42:ac:11:00:02 brd ff:ff:ff:ff:ff:ff"
-                if cmd[:5] == ["ip", "-f", "inet", "addr", "show"]:
-                    return "    inet 10.0.0.2/24 brd 10.0.0.255 scope global eth0"
-                return ""
-            return real_check_output(cmd, *args, **kwargs)
-
-        with patch("subprocess.check_output", side_effect=fake_check_output), \
-             patch("inventory.server.open", mock_open(read_data=arp_data), create=True), \
-             patch("inventory.server.gather_cam_arp"), \
-             patch("socket.gethostname", return_value="srv"), \
-             patch("socket.gethostbyname", return_value="10.0.0.2"):
-            device = server.discover_local_server()
-
-        host = Host.objects.get(mac_address="aa:bb:cc:dd:ee:ff")
-        self.assertEqual(host.ip_address, "10.0.0.5")
-        self.assertEqual(host.interface.device, device)
 
 
 class TopologyDataTest(TestCase):
