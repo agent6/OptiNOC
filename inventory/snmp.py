@@ -31,6 +31,7 @@ except Exception:  # pragma: no cover - fallback for missing pysnmp on Py3.12
         Client = PyWrapper = None
 from django.utils import timezone
 from .models import Device, Interface, Connection, Host
+from .ping import check_ping
 
 
 DEFAULT_COMMUNITY = "public"
@@ -117,8 +118,24 @@ def scan_device(ip, community=DEFAULT_COMMUNITY):
     sys_name = snmp_get(SYS_NAME_OID, ip, community)
     sys_descr = snmp_get(SYS_DESCR_OID, ip, community)
     if sys_name is None:
-        # Device did not respond
-        return None
+        # Device did not respond to SNMP; try ICMP reachability
+        if not check_ping(ip):
+            return None
+        device, _ = Device.objects.get_or_create(management_ip=ip)
+        if not device.hostname:
+            device.hostname = ip
+        device.is_online = True
+        now = timezone.now()
+        device.last_ping = now
+        device.last_seen = now
+        device.save(update_fields=[
+            "hostname",
+            "is_online",
+            "last_ping",
+            "last_seen",
+            "management_ip",
+        ])
+        return device
 
     device, _ = Device.objects.get_or_create(management_ip=ip)
     device.hostname = str(sys_name)
