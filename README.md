@@ -61,7 +61,7 @@ The project is mirrored on GitHub at [agent6/OptiNOC](https://github.com/agent6/
 ## ⚙️ Installation (Development)
 
 ```bash
-git clone https://github.com/yourusername/OptiNOC.git
+git clone https://github.com/agent6/OptiNOC.git
 cd OptiNOC
 # For Ubuntu/Debian you can run the helper script
 ./scripts/setup_ubuntu.sh
