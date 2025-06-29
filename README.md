@@ -80,6 +80,10 @@ python manage.py migrate
 # Create superuser
 python manage.py createsuperuser
 
+# Access the Django administration site at http://localhost:8000/admin and
+# manage devices, interfaces, tags and alert profiles using the account created
+# above.
+
 # Start the server
 python manage.py runserver
 

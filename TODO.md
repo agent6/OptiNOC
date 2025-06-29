@@ -42,7 +42,7 @@
 23. [x] **Data storage for history:** Implemented a `MetricRecord` model with an index on device/interface/metric/timestamp to store historical metric values. Added API support for filtering records by date range to keep queries efficient.
 24. [x] **Graphing historical data:** Implemented HTMX-driven Chart.js graphs on device and new interface detail pages. Historical CPU and bandwidth metrics are pulled via REST endpoints and rendered dynamically.
 25. [x] **Alert evaluation:** In each polling cycle (SNMP or ping), compare metrics against the AlertProfiles. If a threshold is crossed (e.g. CPU > X, interface down, ping lost), create an Alert record. Mark assets with active alerts in the UI. (Notifications can be added later; initially just logging and UI display is sufficient.)
-26. [ ] **Administration interface:** Register key models in Django Admin (Device, Interface, Tag, AlertProfile) so admins can edit tags and alert settings via the built-in interface as needed.
+26. [x] **Administration interface:** Registered the key models in Django Admin (Device, Interface, Tag, AlertProfile, Connection, Alert) so admins can manage inventory objects, tags and alert settings via the built-in interface.
 
 ## Testing, Documentation, and Deployment
 
