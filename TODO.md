@@ -51,3 +51,4 @@
 29. [x] **Interactive superuser creation script:** Added `scripts/create_superuser.sh` which prompts for a username and password and creates the Django superuser. README updated with usage.
 30. [x] **Python 3.12 SNMP fallback:** Added optional `puresnmp` dependency and
     fallback logic so scans run even when `pysnmp` wheels are unavailable.
+31. [x] **Static file serving with WhiteNoise:** Integrated WhiteNoise middleware and storage so the app can serve static assets without an external web server.

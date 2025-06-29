@@ -75,6 +75,8 @@ sudo apt-get install -y graphviz graphviz-dev libgraphviz-dev pkg-config
 
 pip install -r requirements.txt
 
+# Requirements include WhiteNoise for static file serving
+
 # Set up environment variables (or use .env file)
 export DJANGO_SECRET_KEY='your-secret-key'
 export DB_NAME='optinoc_db'
@@ -126,6 +128,7 @@ celery -A optinoc beat -l info
 ### Static & Media Files
 
 Run `python manage.py collectstatic` to copy Bootstrap and other assets into `STATIC_ROOT`. User uploads will be stored in `MEDIA_ROOT`.
+When `DEBUG` is disabled, static files are served directly by WhiteNoise so no extra web server configuration is needed.
 
 ## Usage
 
