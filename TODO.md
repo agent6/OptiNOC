@@ -54,4 +54,5 @@
 31. [x] **Static file serving with WhiteNoise:** Integrated WhiteNoise middleware and storage so the app can serve static assets without an external web server.
 32. [x] **Ping fallback in discovery:** `scan_network` now adds devices that respond to ICMP even when SNMP requests fail.
 33. [x] **Ping fallback fix:** Devices are created when pingable but previously unknown.
+34. [x] **Non-root ping fallback:** `check_ping` now falls back to the system `ping` command when raw socket access is unavailable.
 
