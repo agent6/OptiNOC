@@ -70,6 +70,16 @@ export DJANGO_SECRET_KEY='your-secret-key'
 export DB_NAME='optinoc_db'
 export CELERY_BROKER_URL='redis://localhost:6379/0'
 
+# Optional: use PostgreSQL instead of SQLite
+export USE_POSTGRES=true
+export DB_USER='optinoc'
+export DB_PASSWORD='secret'
+export DB_HOST='localhost'
+export DB_PORT='5432'
+
+# Celery result backend (defaults to broker URL)
+export CELERY_RESULT_BACKEND='redis://localhost:6379/0'
+
 # Optional static and media locations
 export STATIC_ROOT="$PWD/static_root"
 export MEDIA_ROOT="$PWD/media"
@@ -92,16 +102,34 @@ celery -A optinoc worker -l info
 # Start Celery beat scheduler
 celery -A optinoc beat -l info
 ```
+### Environment Variables
+
+- **DJANGO_SECRET_KEY** – secret key for Django
+- **USE_POSTGRES** – set to `true` to enable PostgreSQL settings
+- **DB_NAME**, **DB_USER**, **DB_PASSWORD**, **DB_HOST**, **DB_PORT** – PostgreSQL connection details
+- **CELERY_BROKER_URL** – URL of the Celery broker (e.g. Redis)
+- **CELERY_RESULT_BACKEND** – where Celery stores task results
+- **STATIC_ROOT** / **MEDIA_ROOT** – paths for collected static files and media
+
 
 ### Static & Media Files
 
 Run `python manage.py collectstatic` to copy Bootstrap and other assets into `STATIC_ROOT`. User uploads will be stored in `MEDIA_ROOT`.
 
+## Usage
+
+After starting the server and Celery workers, log in to the Django admin at http://localhost:8000/admin.
+Add devices with management IP addresses and provide SNMP communities or SSH credentials.
+
 For network scanning:
 
-* Ensure `snmpwalk`, Redis, and necessary ports are available.
-* Celery for async scans.
-* You can also run `python manage.py scan_network --seed <IP>` for a manual discovery scan or without `--seed` to rescan existing devices.
+* Ensure `snmpwalk` and Redis are installed and accessible.
+* Run `python manage.py scan_network --seed <IP>` for an initial discovery scan. Add `--async` to offload to Celery.
+* Periodic scans and metric polling will run automatically when Celery beat is active.
+
+Each device has a **roadblocks** field listing issues encountered during discovery, such as unreachable hosts or invalid credentials. Resolve these to improve network visibility.
+
+
 
 ---
 
