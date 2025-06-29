@@ -228,6 +228,43 @@ class ServerDiscoveryTest(TestCase):
         self.assertEqual(host.ip_address, "10.0.0.5")
         self.assertEqual(host.interface.device, device)
 
+    def test_proc_net_arp_additional_entries(self):
+        ip_neigh = "10.0.0.6 dev eth0 lladdr aa:aa:aa:aa:aa:aa REACHABLE\n"
+        arp_data = (
+            "IP address       HW type     Flags       HW address            Mask     Device\n"
+            "10.0.0.5       0x1         0x2         bb:bb:bb:bb:bb:bb     *        eth0\n"
+        )
+
+        real_check_output = subprocess.check_output
+
+        def fake_check_output(cmd, *args, **kwargs):
+            if isinstance(cmd, list) and cmd and cmd[0] == "ip":
+                if len(cmd) > 1 and cmd[1] == "neigh":
+                    return ip_neigh
+                if cmd[:3] == ["ip", "-o", "link"]:
+                    return (
+                        "2: eth0: <BROADCAST> mtu 1500 qdisc noop state DOWN mode DEFAULT group default qlen 1000 "
+                        "link/ether 02:42:ac:11:00:02 brd ff:ff:ff:ff:ff:ff"
+                    )
+                if cmd[:5] == ["ip", "-f", "inet", "addr", "show"]:
+                    return "    inet 10.0.0.2/24 brd 10.0.0.255 scope global eth0"
+                return ""
+            return real_check_output(cmd, *args, **kwargs)
+
+        with patch("subprocess.check_output", side_effect=fake_check_output), \
+             patch("inventory.server.open", mock_open(read_data=arp_data), create=True), \
+             patch("inventory.server.gather_cam_arp"), \
+             patch("socket.gethostname", return_value="srv"), \
+             patch("socket.gethostbyname", return_value="10.0.0.2"):
+            device = server.discover_local_server()
+
+        hosts = list(
+            Host.objects.filter(interface__device=device)
+            .order_by("mac_address")
+            .values_list("mac_address", flat=True)
+        )
+        self.assertEqual(hosts, ["aa:aa:aa:aa:aa:aa", "bb:bb:bb:bb:bb:bb"])
+
 
 class TopologyDataTest(TestCase):
     def setUp(self):

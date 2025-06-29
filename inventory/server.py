@@ -77,22 +77,30 @@ def discover_local_server():
         pass
 
     neighbor_entries = []
+    neighbor_set = set()
     try:
         neigh_out = subprocess.check_output(['ip', 'neigh'], text=True)
         for line in neigh_out.splitlines():
             parts = line.split()
-            if len(parts) >= 6 and parts[2] == 'dev' and parts[4] == 'lladdr':
-                neighbor_entries.append((parts[0], parts[3], parts[5]))
+            if len(parts) >= 6 and parts[1] == 'dev' and parts[3] == 'lladdr':
+                entry = (parts[0], parts[2], parts[4])
+                if entry not in neighbor_set:
+                    neighbor_entries.append(entry)
+                    neighbor_set.add(entry)
     except Exception:
-        try:
-            with open('/proc/net/arp') as f:
-                next(f)
-                for line in f:
-                    parts = line.split()
-                    if len(parts) >= 6:
-                        neighbor_entries.append((parts[0], parts[5], parts[3]))
-        except Exception:
-            pass
+        pass
+    try:
+        with open('/proc/net/arp') as f:
+            next(f)
+            for line in f:
+                parts = line.split()
+                if len(parts) >= 6:
+                    entry = (parts[0], parts[5], parts[3])
+                    if entry not in neighbor_set:
+                        neighbor_entries.append(entry)
+                        neighbor_set.add(entry)
+    except Exception:
+        pass
 
     for ip_addr, if_name, mac in neighbor_entries:
         iface_obj = device.interfaces.filter(name=if_name).first()
