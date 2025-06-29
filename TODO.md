@@ -47,4 +47,4 @@
 ## Testing, Documentation, and Deployment
 
 27. [x] **Document setup and usage:** README now includes installation steps, environment variables, how to run scans and what the roadblocks field means.
-28. [ ] **Prepare for on-premises deployment:** Ensure all dependencies are installable from internal repos if needed. Configure Django’s `ALLOWED_HOSTS` and security settings for production. Provide a script to install on a local Ubuntu server, so that all packages (both Ubuntu and PIP) are installed.
+28. [ ] **Prepare for on-premises deployment:** Ensure all dependencies are installable from internal repos if needed. Configure Django’s `ALLOWED_HOSTS` and security settings for production. Provide a script to install on a local Ubuntu server, so that all packages (both Ubuntu and PIP) are installed. This script will not only install everything but also make sure the program runs after a reboot and is started when the script is done.
