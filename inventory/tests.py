@@ -310,3 +310,19 @@ class AlertEvaluationTest(TestCase):
         tasks.metric_poll_task()
         alert.refresh_from_db()
         self.assertIsNotNone(alert.cleared_at)
+
+
+class DeviceDetailHostsViewTest(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user('tester', 't@example.com', 'pw')
+
+    def test_device_detail_displays_hosts(self):
+        device = Device.objects.create(hostname='r1')
+        iface = Interface.objects.create(device=device, name='eth0')
+        Host.objects.create(mac_address='aa:bb:cc:dd:ee:ff', ip_address='10.0.0.2', interface=iface)
+
+        self.client.force_login(self.user)
+        resp = self.client.get(reverse('device_detail', args=[device.pk]))
+        self.assertEqual(resp.status_code, 200)
+        self.assertContains(resp, 'aa:bb:cc:dd:ee:ff')
+        self.assertContains(resp, '10.0.0.2')

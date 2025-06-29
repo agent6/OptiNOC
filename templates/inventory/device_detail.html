@@ -39,6 +39,21 @@
     <li>No connections recorded.</li>
   {% endfor %}
 </ul>
+{% if hosts %}
+<h3>ARP Table</h3>
+<table class="table table-sm">
+  <thead><tr><th>MAC</th><th>IP</th><th>Interface</th></tr></thead>
+  <tbody>
+    {% for host in hosts %}
+    <tr>
+      <td>{{ host.mac_address }}</td>
+      <td>{{ host.ip_address }}</td>
+      <td>{{ host.interface.name }}</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endif %}
 <h3>CPU Usage</h3>
 <canvas id="cpu-chart" height="200"></canvas>
 <div id="cpu-data"
