@@ -61,8 +61,14 @@
 ```bash
 git clone https://github.com/yourusername/OptiNOC.git
 cd OptiNOC
+# For Ubuntu/Debian you can run the helper script
+./scripts/setup_ubuntu.sh
+
 python -m venv venv
 source venv/bin/activate
+# Ubuntu: install Graphviz libraries for pygraphviz
+sudo apt-get install -y graphviz graphviz-dev libgraphviz-dev pkg-config
+
 pip install -r requirements.txt
 
 # Set up environment variables (or use .env file)
