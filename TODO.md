@@ -64,3 +64,4 @@
 40. [x] ARP hosts from the local server now seed recursive discovery, but only private IPs are scanned.
 41. [x] Discovery restricted to RFC1918 ranges using explicit network checks.
 42. [x] Device detail page now lists ARP entries associated with the asset.
+43. [x] ARP parsing now falls back to /proc/net/arp when the 'ip' command is missing.
