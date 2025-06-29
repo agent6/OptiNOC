@@ -153,17 +153,46 @@ class DiscoveryLogicTest(TestCase):
             return device
 
         def fake_gather_cam_arp(ip, community="public"):
-            if ip == "192.0.2.1":
+            if ip == "10.0.0.1":
                 iface = created[ip].interfaces.first()
-                Host.objects.create(mac_address="aa", ip_address="192.0.2.2", interface=iface)
+                Host.objects.create(mac_address="aa", ip_address="10.0.0.2", interface=iface)
 
         with patch.object(discovery_module, "scan_device", side_effect=fake_scan), \
              patch.object(discovery_module, "discover_neighbors", return_value=None), \
              patch.object(discovery_module, "gather_cam_arp", side_effect=fake_gather_cam_arp), \
              patch.object(discovery_module, "discover_local_server", return_value=None):
-            visited = discovery_module.discover_network("192.0.2.1")
+            visited = discovery_module.discover_network("10.0.0.1")
+        self.assertEqual(set(visited), {"10.0.0.1", "10.0.0.2"})
 
-        self.assertEqual(set(visited), {"192.0.2.1", "192.0.2.2"})
+    def test_local_arp_seeds_are_filtered(self):
+        created = {}
+
+        def fake_scan(ip, community="public"):
+            device = Device.objects.create(hostname=f"dev-{ip}", management_ip=ip)
+            Interface.objects.create(device=device, name="eth0")
+            created[ip] = device
+            return device
+
+        created_srv = {}
+
+        def fake_discover_local_server():
+            if created_srv:
+                return created_srv["srv"]
+            srv = Device.objects.create(hostname="srv", management_ip="10.0.0.100")
+            iface = Interface.objects.create(device=srv, name="eth0")
+            Host.objects.create(mac_address="bb", ip_address="10.0.0.5", interface=iface)
+            Host.objects.create(mac_address="cc", ip_address="8.8.8.8", interface=iface)
+            created_srv["srv"] = srv
+            return srv
+
+        with patch.object(discovery_module, "scan_device", side_effect=fake_scan), \
+             patch.object(discovery_module, "discover_neighbors", return_value=None), \
+             patch.object(discovery_module, "gather_cam_arp", return_value=None), \
+             patch.object(discovery_module, "discover_local_server", side_effect=fake_discover_local_server):
+            visited = discovery_module.periodic_scan()
+
+        self.assertIn("10.0.0.5", visited)
+        self.assertNotIn("8.8.8.8", visited)
 
 
 class TopologyDataTest(TestCase):
