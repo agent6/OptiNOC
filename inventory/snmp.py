@@ -124,6 +124,7 @@ def scan_device(ip, community=DEFAULT_COMMUNITY):
         device, _ = Device.objects.get_or_create(
             management_ip=ip, defaults={"hostname": ip}
         )
+
         if not device.hostname:
             device.hostname = ip
         device.is_online = True
@@ -142,6 +143,7 @@ def scan_device(ip, community=DEFAULT_COMMUNITY):
     device, _ = Device.objects.get_or_create(
         management_ip=ip, defaults={"hostname": str(sys_name)}
     )
+
     device.hostname = str(sys_name)
     device.vendor = str(sys_descr).split()[0] if sys_descr else ""
     device.os_version = str(sys_descr)

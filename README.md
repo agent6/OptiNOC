@@ -139,7 +139,7 @@ For network scanning:
 
 * Ensure `snmpwalk` and Redis are installed and accessible.
 * Run `python manage.py scan_network --seed <IP>` for an initial discovery scan. Add `--async` to offload to Celery.
-  Devices that respond to a ping will be added even if SNMP is unavailable, with the IP used as the hostname.
+* Devices that respond to a ping will be added even if SNMP is unavailable, with the IP used as the hostname.
 * Periodic scans and metric polling will run automatically when Celery beat is active.
 
 Each device has a **roadblocks** field listing issues encountered during discovery, such as unreachable hosts or invalid credentials. Resolve these to improve network visibility.
