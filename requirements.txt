@@ -39,3 +39,4 @@ python-dotenv>=1.0
 
 # WSGI server for production
 gunicorn>=21.2
+whitenoise>=6.9
