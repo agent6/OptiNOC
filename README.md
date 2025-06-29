@@ -118,6 +118,7 @@ celery -A optinoc beat -l info
 - **CELERY_BROKER_URL** – URL of the Celery broker (e.g. Redis)
 - **CELERY_RESULT_BACKEND** – where Celery stores task results
 - **STATIC_ROOT** / **MEDIA_ROOT** – paths for collected static files and media
+- **ALLOWED_HOSTS** – comma separated hosts allowed when running in production
 
 
 ### Static & Media Files
@@ -136,6 +137,16 @@ For network scanning:
 * Periodic scans and metric polling will run automatically when Celery beat is active.
 
 Each device has a **roadblocks** field listing issues encountered during discovery, such as unreachable hosts or invalid credentials. Resolve these to improve network visibility.
+
+## 🏭 On-Premise Deployment
+
+For a one-step install on a fresh Ubuntu server, run:
+
+```bash
+curl -L https://raw.githubusercontent.com/agent6/OptiNOC/main/scripts/install_onprem.sh | bash
+```
+
+The script clones this repository, installs system and Python dependencies, runs migrations and collects static files, then starts Gunicorn via a systemd service so OptiNOC launches automatically after reboot.
 
 
 
