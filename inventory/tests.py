@@ -63,6 +63,17 @@ class SNMPScanTest(TestCase):
         self.assertEqual(device.interfaces.count(), 2)
 
 
+class PingFallbackTest(TestCase):
+    def test_scan_device_adds_host_when_pingable(self):
+        with patch.object(snmp_module, "snmp_get", side_effect=[None, None]), \
+             patch.object(snmp_module, "check_ping", return_value=True):
+            device = snmp_module.scan_device("192.0.2.1")
+
+        self.assertIsNotNone(device)
+        self.assertEqual(device.hostname, "192.0.2.1")
+        self.assertTrue(device.is_online)
+
+
 class NeighborDiscoveryTest(TestCase):
     def test_discover_neighbors_creates_connections(self):
         device = Device.objects.create(hostname="sw1", management_ip="192.0.2.1")

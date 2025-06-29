@@ -121,7 +121,10 @@ def scan_device(ip, community=DEFAULT_COMMUNITY):
         # Device did not respond to SNMP; try ICMP reachability
         if not check_ping(ip):
             return None
-        device, _ = Device.objects.get_or_create(management_ip=ip)
+        device, _ = Device.objects.get_or_create(
+            management_ip=ip, defaults={"hostname": ip}
+        )
+
         if not device.hostname:
             device.hostname = ip
         device.is_online = True
@@ -137,7 +140,10 @@ def scan_device(ip, community=DEFAULT_COMMUNITY):
         ])
         return device
 
-    device, _ = Device.objects.get_or_create(management_ip=ip)
+    device, _ = Device.objects.get_or_create(
+        management_ip=ip, defaults={"hostname": str(sys_name)}
+    )
+
     device.hostname = str(sys_name)
     device.vendor = str(sys_descr).split()[0] if sys_descr else ""
     device.os_version = str(sys_descr)
