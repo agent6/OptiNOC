@@ -12,3 +12,14 @@ class DeviceTagForm(forms.ModelForm):
     class Meta:
         model = Device
         fields = ['tags']
+
+
+class DeviceCredentialsForm(forms.ModelForm):
+    class Meta:
+        model = Device
+        fields = [
+            "snmp_community",
+            "ssh_username",
+            "ssh_password",
+            "roadblocks",
+        ]

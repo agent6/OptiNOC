@@ -144,6 +144,7 @@ For network scanning:
 * Periodic scans and metric polling will run automatically when Celery beat is active.
 
 Each device has a **roadblocks** field listing issues encountered during discovery, such as unreachable hosts or invalid credentials. Resolve these to improve network visibility.
+Use the *Edit Credentials* link on a device page to update SNMP or SSH details and clear roadblocks.
 
 ## 🏭 On-Premise Deployment
 
