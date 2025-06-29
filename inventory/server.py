@@ -76,21 +76,32 @@ def discover_local_server():
     except Exception:
         pass
 
+    neighbor_entries = []
     try:
         neigh_out = subprocess.check_output(['ip', 'neigh'], text=True)
         for line in neigh_out.splitlines():
             parts = line.split()
             if len(parts) >= 6 and parts[2] == 'dev' and parts[4] == 'lladdr':
-                ip_addr, if_name, mac = parts[0], parts[3], parts[5]
-                iface_obj = device.interfaces.filter(name=if_name).first()
-                host, _ = Host.objects.get_or_create(mac_address=mac)
-                host.ip_address = ip_addr
-                if iface_obj:
-                    host.interface = iface_obj
-                host.last_seen = timezone.now()
-                host.save()
+                neighbor_entries.append((parts[0], parts[3], parts[5]))
     except Exception:
-        pass
+        try:
+            with open('/proc/net/arp') as f:
+                next(f)
+                for line in f:
+                    parts = line.split()
+                    if len(parts) >= 6:
+                        neighbor_entries.append((parts[0], parts[5], parts[3]))
+        except Exception:
+            pass
+
+    for ip_addr, if_name, mac in neighbor_entries:
+        iface_obj = device.interfaces.filter(name=if_name).first()
+        host, _ = Host.objects.get_or_create(mac_address=mac)
+        host.ip_address = ip_addr
+        if iface_obj:
+            host.interface = iface_obj
+        host.last_seen = timezone.now()
+        host.save()
 
     if mgmt_ip:
         try:
