@@ -4,6 +4,4 @@
 - Activate the virtual environment with `source venv/bin/activate` or create one using `scripts/setup_ubuntu.sh` if needed.
 - Keep code style consistent with existing codebase; no additional style tools are enforced.
 - Place any project documentation or new scripts under appropriate directories.
-- Keep README.md Valid and current
-- Make sure the backlog (TODO.md) is updated at time of Commit
 - Commit messages should be concise and descriptive.
