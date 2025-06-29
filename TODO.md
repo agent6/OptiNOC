@@ -62,3 +62,4 @@
 38. [x] Added local server discovery which registers the host and parses the ARP table for connected nodes.
 39. [x] Startup scan added via `wsgi.py` and Celery beat now runs discovery every 5 minutes. Assets page includes a "Run Discovery" button.
 40. [x] ARP hosts from the local server now seed recursive discovery, but only private IPs are scanned.
+41. [x] Discovery restricted to RFC1918 ranges using explicit network checks.

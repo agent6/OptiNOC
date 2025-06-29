@@ -18,7 +18,7 @@ The project is mirrored on GitHub at [agent6/OptiNOC](https://github.com/agent6/
 - **Asset Fingerprinting & Inventory**
   Classifies devices with vendor, model, OS, interface data, and environmental metadata.
 - **Local Server Auto-Inventory**
-  The Ubuntu host running OptiNOC is automatically added as an asset and its ARP table parsed for connected nodes, which seed further discovery on private IPs.
+  The Ubuntu host running OptiNOC is automatically added as an asset and its ARP table parsed for connected nodes, which seed further discovery on private RFC1918 IPs.
 
 - **Logical Network Mapping**  
   Visualizes device relationships and topologies based on link-layer discovery and MAC/IP mapping.

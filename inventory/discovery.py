@@ -1,5 +1,21 @@
 import ipaddress
 
+# Only scan addresses within these RFC1918 private ranges
+PRIVATE_NETWORKS = [
+    ipaddress.ip_network("10.0.0.0/8"),
+    ipaddress.ip_network("172.16.0.0/12"),
+    ipaddress.ip_network("192.168.0.0/16"),
+]
+
+
+def _is_private(ip):
+    """Return True if *ip* is within one of the RFC1918 ranges."""
+    try:
+        addr = ipaddress.ip_address(ip)
+    except ValueError:
+        return False
+    return any(addr in net for net in PRIVATE_NETWORKS)
+
 from .snmp import scan_device, discover_neighbors, gather_cam_arp
 from .models import Host, Device
 from .server import discover_local_server
@@ -18,10 +34,7 @@ def _crawl_network(seed_ips, community=DEFAULT_COMMUNITY):
         ip = queue.pop(0)
         if ip in visited:
             continue
-        try:
-            if not ipaddress.ip_address(ip).is_private:
-                continue
-        except ValueError:
+        if not _is_private(ip):
             continue
 
         device = scan_device(ip, community)
@@ -37,12 +50,8 @@ def _crawl_network(seed_ips, community=DEFAULT_COMMUNITY):
             "ip_address", flat=True
         )
         for host_ip in hosts:
-            if host_ip and host_ip not in visited:
-                try:
-                    if ipaddress.ip_address(host_ip).is_private:
-                        queue.append(host_ip)
-                except ValueError:
-                    continue
+            if host_ip and host_ip not in visited and _is_private(host_ip):
+                queue.append(host_ip)
 
     return list(visited)
 
@@ -63,7 +72,7 @@ def periodic_scan(community=DEFAULT_COMMUNITY):
             for ip in Host.objects.filter(interface__device=server).values_list(
                 "ip_address", flat=True
             )
-            if ip and ipaddress.ip_address(ip).is_private
+            if ip and _is_private(ip)
         )
 
     seeds.extend(
