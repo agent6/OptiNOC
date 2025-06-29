@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.urls import reverse
 from django.contrib.auth.models import User
 from .models import Device, Interface, Connection, Tag, AlertProfile, Host, MetricRecord, Alert
@@ -195,6 +195,32 @@ class DiscoveryLogicTest(TestCase):
 
         self.assertIn("10.0.0.5", visited)
         self.assertNotIn("8.8.8.8", visited)
+
+    def test_ospf_module_enqueues_neighbors(self):
+        created = {}
+
+        def fake_scan(ip, community="public"):
+            device = Device.objects.create(hostname=f"dev-{ip}", management_ip=ip)
+            Interface.objects.create(device=device, name="eth0")
+            created[ip] = device
+            return device
+
+        def fake_ospf(ip, community="public"):
+            if ip == "10.0.0.1":
+                return ["10.0.0.3"]
+            return []
+
+        with override_settings(DISCOVERY_MODULES=["ospf"]), \
+             patch.object(discovery_module, "scan_device", side_effect=fake_scan), \
+             patch.object(discovery_module, "discover_neighbors", return_value=None), \
+             patch.object(discovery_module, "gather_cam_arp", return_value=None), \
+             patch.object(discovery_module, "discover_ospf_neighbors", side_effect=fake_ospf), \
+             patch.object(discovery_module, "discover_ospfv3_neighbors", return_value=[]), \
+             patch.object(discovery_module, "discover_bgp_neighbors", return_value=[]), \
+             patch.object(discovery_module, "discover_local_server", return_value=None):
+            visited = discovery_module.discover_network("10.0.0.1")
+
+        self.assertIn("10.0.0.3", visited)
 
 
 class ServerDiscoveryTest(TestCase):

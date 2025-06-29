@@ -124,6 +124,7 @@ celery -A optinoc beat -l info
 - **CELERY_RESULT_BACKEND** – where Celery stores task results
 - **STATIC_ROOT** / **MEDIA_ROOT** – paths for collected static files and media
 - **ALLOWED_HOSTS** – comma separated hosts allowed when running in production
+- **DISCOVERY_MODULES** – comma separated discovery modules to enable (default `arp,cdp,lldp`)
 
 
 ### Static & Media Files
