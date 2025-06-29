@@ -17,6 +17,18 @@ except Exception:  # pragma: no cover - fallback for missing pysnmp on Py3.12
 
     def nextCmd(*args, **kwargs):  # type: ignore
         raise ImportError("pysnmp is not available")
+
+    try:
+        from puresnmp import Client, V2C, PyWrapper
+        import asyncio
+
+        def _pure_client(target, community, port, timeout, retries):
+            client = Client(target, V2C(community), port=port)
+            client.configure(timeout=timeout, retries=retries)
+            return PyWrapper(client)
+
+    except Exception:  # pragma: no cover - no SNMP libraries available
+        Client = PyWrapper = None
 from django.utils import timezone
 from .models import Device, Interface, Connection, Host
 
@@ -27,6 +39,18 @@ DEFAULT_PORT = 161
 
 def snmp_get(oid, target, community=DEFAULT_COMMUNITY, port=DEFAULT_PORT, timeout=1, retries=0):
     """Perform a simple SNMP GET request and return the value or None on failure."""
+    if SnmpEngine is None:
+        if Client is None:
+            raise ImportError("No SNMP library available")
+        async def _run():
+            wrapper = _pure_client(target, community, port, timeout, retries)
+            return await wrapper.get(oid)
+
+        try:
+            return asyncio.run(_run())
+        except Exception:
+            return None
+
     iterator = getCmd(
         SnmpEngine(),
         CommunityData(community, mpModel=0),
@@ -42,6 +66,24 @@ def snmp_get(oid, target, community=DEFAULT_COMMUNITY, port=DEFAULT_PORT, timeou
 
 def snmp_walk(oid, target, community=DEFAULT_COMMUNITY, port=DEFAULT_PORT, timeout=1, retries=0):
     """Generator yielding OID, value pairs from an SNMP walk."""
+    if SnmpEngine is None:
+        if Client is None:
+            raise ImportError("No SNMP library available")
+
+        async def _run():
+            wrapper = _pure_client(target, community, port, timeout, retries)
+            results = []
+            async for vb in wrapper.walk(oid):
+                results.append((str(vb.oid), vb.value))
+            return results
+
+        try:
+            for item in asyncio.run(_run()):
+                yield item
+            return
+        except Exception:
+            return
+
     for (error_indication, error_status, error_index, var_binds) in nextCmd(
         SnmpEngine(),
         CommunityData(community, mpModel=0),

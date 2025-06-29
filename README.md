@@ -68,6 +68,8 @@ cd OptiNOC
 
 python -m venv venv
 source venv/bin/activate
+# Python 3.11 is recommended. On Python 3.12 the project falls back to
+# ``puresnmp`` as ``pysnmp`` wheels are not available.
 # Ubuntu: install Graphviz libraries for pygraphviz
 sudo apt-get install -y graphviz graphviz-dev libgraphviz-dev pkg-config
 

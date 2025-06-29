@@ -49,3 +49,5 @@
 27. [x] **Document setup and usage:** README now includes installation steps, environment variables, how to run scans and what the roadblocks field means.
 28. [x] **Prepare for on-premises deployment:** The script will clone the repo (pull down), and ensure all dependencies are installable from internal repos if needed. Configure Django’s `ALLOWED_HOSTS` and security settings for production. Provide a script to install on a local Ubuntu server, so that all packages (both Ubuntu and PIP) are installed. This script will not only install everything but also make sure the program runs after a reboot and is started when the script is done. Add a simple one line command to get and run the script in the README.md file
 29. [x] **Interactive superuser creation script:** Added `scripts/create_superuser.sh` which prompts for a username and password and creates the Django superuser. README updated with usage.
+30. [x] **Python 3.12 SNMP fallback:** Added optional `puresnmp` dependency and
+    fallback logic so scans run even when `pysnmp` wheels are unavailable.
