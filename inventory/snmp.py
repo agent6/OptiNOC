@@ -275,6 +275,36 @@ def gather_cam_arp(ip, community=DEFAULT_COMMUNITY):
         host.save()
 
 
+# OSPF and BGP neighbor OIDs
+OSPF_NBR_IP_OID = "1.3.6.1.2.1.14.10.1.1"
+OSPFV3_NBR_RTRID_OID = "1.3.6.1.2.1.191.1.2.2.1.1"
+BGP_REMOTE_ADDR_OID = "1.3.6.1.2.1.15.3.1.7"
+
+
+def discover_ospf_neighbors(ip, community=DEFAULT_COMMUNITY):
+    """Return list of OSPF neighbor IPs."""
+    neighbors = []
+    for _, val in snmp_walk(OSPF_NBR_IP_OID, ip, community):
+        neighbors.append(str(val))
+    return neighbors
+
+
+def discover_ospfv3_neighbors(ip, community=DEFAULT_COMMUNITY):
+    """Return list of OSPFv3 neighbor router IDs."""
+    neighbors = []
+    for _, val in snmp_walk(OSPFV3_NBR_RTRID_OID, ip, community):
+        neighbors.append(str(val))
+    return neighbors
+
+
+def discover_bgp_neighbors(ip, community=DEFAULT_COMMUNITY):
+    """Return list of BGP peer addresses."""
+    neighbors = []
+    for _, val in snmp_walk(BGP_REMOTE_ADDR_OID, ip, community):
+        neighbors.append(str(val))
+    return neighbors
+
+
 # Performance metric OIDs
 CPU_LOAD_OID = "1.3.6.1.2.1.25.3.3.1.2"
 MEM_TOTAL_OID = "1.3.6.1.4.1.2021.4.5.0"

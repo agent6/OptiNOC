@@ -1,7 +1,16 @@
 from celery import shared_task
 from .discovery import discover_network, periodic_scan
 from django.utils import timezone
-from .snmp import scan_device, discover_neighbors, gather_cam_arp, poll_metrics
+from django.conf import settings
+from .snmp import (
+    scan_device,
+    discover_neighbors,
+    gather_cam_arp,
+    poll_metrics,
+    discover_ospf_neighbors,
+    discover_ospfv3_neighbors,
+    discover_bgp_neighbors,
+)
 from .ping import check_ping
 from .models import Device, MetricRecord, Alert, AlertProfile
 
@@ -49,14 +58,26 @@ def scan_device_task(ip, community="public"):
     if device is None:
         return []
 
-    discover_neighbors(ip, community)
-    gather_cam_arp(ip, community)
+    modules = getattr(settings, "DISCOVERY_MODULES", ["arp", "cdp", "lldp"])
+    modules = {m.strip().lower() for m in modules}
+    if {"cdp", "lldp"} & modules:
+        discover_neighbors(ip, community)
+    if "arp" in modules:
+        gather_cam_arp(ip, community)
+    new_ips = []
+    if "ospf" in modules:
+        new_ips.extend(discover_ospf_neighbors(ip, community))
+    if "ospfv3" in modules:
+        new_ips.extend(discover_ospfv3_neighbors(ip, community))
+    if "bgp" in modules:
+        new_ips.extend(discover_bgp_neighbors(ip, community))
 
     from .models import Host
 
-    return list(
+    host_ips = list(
         Host.objects.filter(interface__device=device).values_list("ip_address", flat=True)
     )
+    return host_ips + new_ips
 
 
 @shared_task
