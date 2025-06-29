@@ -57,3 +57,4 @@
 34. [x] **Non-root ping fallback:** `check_ping` now falls back to the system `ping` command when raw socket access is unavailable.
 
 35. [x] Fixed missing `{% load static %}` in device_detail template to resolve TemplateSyntaxError.
+36. [x] Switched Bootstrap, Chart.js and HTMX to CDN versions and removed local copies.

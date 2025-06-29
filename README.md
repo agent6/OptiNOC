@@ -127,7 +127,7 @@ celery -A optinoc beat -l info
 
 ### Static & Media Files
 
-Run `python manage.py collectstatic` to copy Bootstrap and other assets into `STATIC_ROOT`. User uploads will be stored in `MEDIA_ROOT`.
+Run `python manage.py collectstatic` to copy static assets into `STATIC_ROOT`. External libraries like Bootstrap, Chart.js and HTMX are loaded from public CDNs. User uploads will be stored in `MEDIA_ROOT`.
 When `DEBUG` is disabled, static files are served directly by WhiteNoise so no extra web server configuration is needed.
 
 ## Usage
