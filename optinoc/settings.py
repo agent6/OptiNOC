@@ -116,7 +116,7 @@ CELERY_BEAT_SCHEDULER = 'django_celery_beat.schedulers:DatabaseScheduler'
 CELERY_BEAT_SCHEDULE = {
     'periodic-scan': {
         'task': 'inventory.tasks.periodic_scan_task',
-        'schedule': crontab(minute=0, hour='*/1'),
+        'schedule': crontab(minute='*/5'),
     },
     'metric-poll': {
         'task': 'inventory.tasks.metric_poll_task',

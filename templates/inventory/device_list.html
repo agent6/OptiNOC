@@ -1,6 +1,10 @@
 {% extends 'base.html' %}
 {% block content %}
 <h2>Assets</h2>
+<form method="post" action="{% url 'trigger_discovery' %}" class="mb-3">
+  {% csrf_token %}
+  <button type="submit" class="btn btn-secondary">Run Discovery</button>
+</form>
 <form class="row g-2 mb-3" method="get">
   <div class="col-auto">
     <input type="text" name="q" value="{{ request.GET.q }}" placeholder="Search" class="form-control" />

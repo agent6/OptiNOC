@@ -3,6 +3,7 @@ from . import views
 
 urlpatterns = [
     path('devices/', views.device_list, name='device_list'),
+    path('devices/discover/', views.trigger_discovery, name='trigger_discovery'),
     path('devices/<int:pk>/', views.device_detail, name='device_detail'),
     path('devices/<int:pk>/credentials/',
          views.device_credentials,
