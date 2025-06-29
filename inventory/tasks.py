@@ -3,7 +3,43 @@ from .discovery import discover_network, periodic_scan
 from django.utils import timezone
 from .snmp import scan_device, discover_neighbors, gather_cam_arp, poll_metrics
 from .ping import check_ping
-from .models import Device, MetricRecord, Alert
+from .models import Device, MetricRecord, Alert, AlertProfile
+
+
+def _get_alert_profiles(device):
+    """Return AlertProfiles linked to the device or its tags."""
+    profiles = list(device.alert_profiles.all())
+    tag_profiles = AlertProfile.objects.filter(tags__in=device.tags.all())
+    for p in tag_profiles:
+        if p not in profiles:
+            profiles.append(p)
+    return profiles
+
+
+def _evaluate_alerts(device, metrics, timestamp):
+    """Create or clear Alert objects based on metrics and profiles."""
+    for profile in _get_alert_profiles(device):
+        if profile.cpu_threshold is not None and metrics.get("cpu") is not None:
+            value = metrics["cpu"]
+            threshold = profile.cpu_threshold
+            active = Alert.objects.filter(
+                device=device, metric="cpu", cleared_at__isnull=True
+            ).first()
+            if value > threshold:
+                if active:
+                    active.value = value
+                    active.threshold = threshold
+                    active.save()
+                else:
+                    Alert.objects.create(
+                        device=device,
+                        metric="cpu",
+                        value=value,
+                        threshold=threshold,
+                    )
+            elif active:
+                active.cleared_at = timestamp
+                active.save()
 
 
 @shared_task
@@ -82,6 +118,7 @@ def metric_poll_task(default_community="public"):
                     timestamp=timestamp,
                 )
 
+        _evaluate_alerts(device, metrics, timestamp)
         results.append(device.management_ip)
 
     return results
@@ -105,14 +142,31 @@ def ping_check_task():
         device.is_online = is_up
         device.last_ping = timestamp
         device.save(update_fields=["is_online", "last_ping"])
+        active = Alert.objects.filter(device=device, metric="ping", cleared_at__isnull=True).first()
         if not is_up:
-            Alert.objects.create(device=device, metric="ping", value=0)
+            if not active:
+                Alert.objects.create(device=device, metric="ping", value=0)
+        elif active:
+            active.value = 1
+            active.cleared_at = timestamp
+            active.save()
         results.append(device.management_ip)
     return results
 
 
 @shared_task
 def alert_check_task():
-    """Placeholder for alert evaluation."""
-    # Logic for evaluating alert thresholds will be implemented later
+    """Evaluate recent metrics against alert profiles."""
+    timestamp = timezone.now()
+    for device in Device.objects.all():
+        latest = {}
+        for metric in ["cpu", "memory"]:
+            rec = (
+                device.metric_records.filter(metric=metric)
+                .order_by("-timestamp")
+                .first()
+            )
+            if rec:
+                latest[metric] = rec.value
+        _evaluate_alerts(device, latest, timestamp)
     return "alerts checked"

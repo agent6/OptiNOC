@@ -29,8 +29,11 @@
 - **Interactive Graphs**
   Device and interface detail pages display historical CPU and bandwidth graphs rendered with Chart.js and HTMX powered AJAX requests.
 
-- **Tags, Alerts & Profiles**  
+- **Tags, Alerts & Profiles**
   Organize assets with tags and configure threshold-based alert profiles to fit your environment.
+
+**Automated Alert Evaluation**
+  Metrics collected during polling are compared to alert profiles each cycle and alerts are created or cleared automatically.
 
 - **On-Premise & Secure**  
   Built for single-organization use with Django local auth and on-premise deployment. No cloud dependencies.
